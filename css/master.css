@@ -1,0 +1,33 @@
+/*Apply the custom coloring to the background*/
+@media all {
+  .background-color {
+    background-image: linear-gradient(top, #3399FF 0%, #FFFFFF 50%);
+    background-image: -webkit-linear-gradient(top, #3399FF 0%, #FFFFFF 50%);
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+  }
+}
+@media all {
+  .bg-color {
+    background-color: #3399FF;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+  }
+}
+
+@media all {
+  .subheader-bkgd .content-area {
+    background-color: #294052;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: scroll;
+  }
+}
+
+@media all {
+  .app-text {
+    color: #FFFFFF;
+  }
+}

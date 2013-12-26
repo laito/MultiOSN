@@ -1,0 +1,17 @@
+{
+	"reponame":"sample-phonegap-audio",
+	"title":"PhoneGap Audio",
+	"tooltip":"Use a Cordova media object to record and playback an audio sound.",
+	"description":"[App Designer Ready] Use a Cordova media object to record and playback audio. Also detects if a previous recording exists.",
+	"highlights":["Apache Cordova* API", "App Designer", "jQuery", "Audio Input"],
+	"apppreview":"false",
+	"appname":"demo.phonegapaudio",
+	"articleUrl":"http://software.intel.com/en-us/articles/media-sample-using-phonegap",
+	"keywords":["Apache Cordova* API", "App Designer", "jQuery", "Audio Input"],
+	"iconUrl":"https://github.com/gomobile/sample-phonegap-audio/blob/master/icon.png",
+	"screenshotUrl":"https://github.com/gomobile/sample-phonegap-audio/blob/master/screenshot.png",
+	"visible" : "true",
+	"zipUrl":"",
+	"relname":"4.0.0",
+	"type":"appdesigner"
+}

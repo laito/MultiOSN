@@ -1,0 +1,31 @@
+{
+  "project": {
+    "projectSettingsVersion": "1.0",
+    "creationData": {
+      "type": "App Designer",
+      "src": "http://edge-intel.s3.amazonaws.com/samples/production/sample-phonegap-audio/sample.zip",
+      "projectGuid": "9f5aa804-3ce2-43ea-aec0-c332aab247e1",
+      "lastModifiedDate": 1388065586747,
+      "creationDate": 1388065586718
+    },
+    "projectFiles": {},
+    "projectDirectories": {},
+    "libraries": [
+      {
+        "name": "Cordova",
+        "version": "2.9.0",
+        "data": {
+          "default": true
+        }
+      },
+      {
+        "name": "intelXDK",
+        "version": "4.0.0",
+        "data": {
+          "default": true
+        }
+      }
+    ],
+    "services": []
+  }
+}

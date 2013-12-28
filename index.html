@@ -45,13 +45,13 @@
 			<!-- Content -->
 			<div id="home-content" data-role="content">
 				<ul data-role="listview" class="homeList">
-					<li class="homeItems"><a onclick="$.mobile.changePage('#sentiment')">Sentiments</a></li>
-					<li class="homeItems"><a onclick="app.loadTweets()">Tweets</a></li>
-					<li class="homeItems"><a onclick="app.loadFacebookPosts()">Facebook Feed</a></li>
-					<li class="homeItems"><a onclick="app.loadFlickr()">Flickr</a></li>
-					<li class="homeItems"><a onclick="app.loadGooglePlus()">Google+</a></li>
-					<li class="homeItems"><a onclick="app.loadYoutube()">Youtube</a></li>
-					<li class="homeItems"><a onclick="app.load24()">Last 24 Hours</a></li>
+					<li class="homeItems"><a href="#sentiment">Sentiments</a></li>
+					<li class="homeItems"><a href="#twitter">Tweets</a></li>
+					<li class="homeItems"><a href="#facebook">Facebook Feed</a></li>
+					<li class="homeItems"><a href="#flickr">Flickr</a></li>
+					<li class="homeItems"><a href="#googleplus">Google+</a></li>
+					<li class="homeItems"><a href="#youtube">Youtube</a></li>
+					<li class="homeItems"><a href="#last24">Last 24 Hours</a></li>
 				</ul>
 			</div>
 		</div>
@@ -66,7 +66,19 @@
 			</div>
 			<!-- Content -->
 			<div id="chartdiv" style="width: 100%; height: 100%; position: relative;" data-role="content">
-					
+			</div>
+		</div>
+        
+        <!-- Last 24 Hours Page -->
+        <div data-role="page" id="last24" data-theme="c">
+			<!-- Panel -->
+			<!-- Header -->
+			<div data-role="header" data-position="fixed" data-tap-toggle="false"> 
+				<a href="index.html" data-role="button" class="ui-btn-left" data-icon="back">Back</a>
+				<h3 class="currentEventTitle"></h3>
+			</div>
+			<!-- Content -->
+			<div id="last24chartdiv" style="width: 100%; height: 100%; position: relative;" data-role="content">
 			</div>
 		</div>
 		
@@ -75,7 +87,7 @@
 			<!-- Panel -->
 			<div data-role="panel" id="twitter-panel-right" data-position="right">
 				<ul data-role="listview">
-					<li class="rightItems"><a onclick="app.loadPositiveTweets()">+ve Sentiment</a></li>
+					<li class="rightItems"><a onclick="app.loadPositiveTweets();">+ve Sentiment</a></li>
 					<li class="rightItems"><a onclick="app.loadNegativeTweets()">-ve Sentiment</a></li>
 				</ul>
 			</div>
@@ -85,9 +97,16 @@
 				<h3 class="currentEventTitle"></h3>
 				<a href="#twitter-panel-right" data-rel="open" data-role="button" class="ui-btn-right" data-icon="setings">Options</a>
 			</div>
+            <div data-role="popup" id="popupBasic" data-theme="a" class="ui-popup ui-body-a ui-overlay-shadow ui-corner-all">
+				<ul data-role="listview" data-inset="true" style="min-width:210px;" data-theme="b" class="ui-listview ui-listview-inset ui-corner-all ui-shadow ui-group-theme-b">
+					
+					<li><a href="options.html" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Options</a></li>
+					<li><a href="methods.html" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Methods</a></li>
+					<li class="ui-last-child"><a href="events.html" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Events</a></li>
+				</ul>
+		</div>
 			<!-- Content -->
 			<div id="twitter-content" data-role="content">
-				Tweets
 			</div>
 		</div>
 		
@@ -108,7 +127,6 @@
 			</div>
 			<!-- Content -->
 			<div id="facebook-content" data-role="content">
-				Facebook Feed
 			</div>
 		</div>
 		
@@ -122,7 +140,6 @@
 			</div>
 			<!-- Content -->
 			<div id="flickr-content" data-role="content">
-				Flickr
 			</div>
 		</div>
 		
@@ -136,7 +153,6 @@
 			</div>
 			<!-- Content -->
 			<div id="google-content" data-role="content">
-				Google+
 			</div>
 		</div>
 		
@@ -150,7 +166,6 @@
 			</div>
 			<!-- Content -->
 			<div id="youtube-content" data-role="content">
-				Youtube
 			</div>
 		</div>
 		
@@ -166,6 +181,7 @@
 		<script type="text/javascript" src="js/jqplot.canvasTextRenderer.min.js"></script>
 		<script type="text/javascript" src="js/jqplot.canvasAxisLabelRenderer.min.js"></script>
 		<script type="text/javascript" src="js/jqplot.dateAxisRenderer.min.js"></script>
+        <script type="text/javascript" src="js/jqplot.enhancedLegendRenderer.min.js"></script>
 		<script type="text/javascript" src="js/index.js"></script>
 
         <script type="text/javascript">

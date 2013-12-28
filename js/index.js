@@ -22,6 +22,7 @@ var app = {
     initialize: function() {
 	
 		var currentEvent = 'Mumbai';
+        
 		localStorage.setItem("PreCogURL", "http://precog.iiitd.edu.in/tools/beta/multiosnportal");
 		localStorage.setItem("currentEvent", currentEvent);
 		
@@ -33,31 +34,6 @@ var app = {
 		}
         
         this.bindEvents();
-		this.geteventnames();
-		var hash = window.location.hash.substring(1);
-		console.log("WTF");
-		console.log(hash);
-		if(hash == "twitter") {
-			this.loadTweets()
-		}
-		else if(hash == "facebook") {
-			this.loadFacebookPosts();
-		}
-		else if(hash == "flickr") {
-			this.loadFlickr();
-		}
-		else if(hash == "googleplus") {
-			this.loadGooglePlus();
-		}
-		else if(hash == "youtube") {
-			this.loadYoutube();
-		}
-		else if(hash == "sentiment") {
-			//app.initializeCharts(true);
-		}
-		else {
-			//app.initializeCharts(false);
-		}
     },
     // Bind Event Listeners
     //
@@ -71,14 +47,45 @@ var app = {
 			$.mobile.loader.prototype.options.theme = "a";
 			$.mobile.loader.prototype.options.html = "";
 		});
+        
 		$(document).bind('pagechange', function() {
 			  $('.ui-page-active .ui-listview').listview('refresh');
 			  $('.ui-page-active :jqmData(role=content)').trigger('create');
-			  
 		});
+        
 		$("#sentiment").on('pageshow', function() {
 			app.loadSentiments();
 		});
+        
+        $("#last24").on('pageshow', function() {
+			app.loadSentiments(true);
+		});
+        
+        $("#page-home").on('pageshow', function() {
+			app.geteventnames();
+		});
+        
+        $("#youtube").on('pageshow', function() {
+			app.loadYoutube();
+		});
+        
+        $("#googleplus").on('pageshow', function() {
+			app.loadGooglePlus();
+		});
+        
+        $("#flickr").on('pageshow', function() {
+			app.loadFlickr();
+		});
+        
+        $("#twitter").on('pageshow', function() {
+			app.loadTweets();
+		});
+        
+        $("#facebook").on('pageshow', function() {
+			app.loadFacebookPosts();
+		});
+        
+        
     },
     // deviceready Event Handler
     //
@@ -90,36 +97,10 @@ var app = {
     receivedEvent: function(id) {
     },
 	
-	initializeCharts: function(callback) {
-		$.jqplot('chartdiv',  [[[1, 2],[3,5.12],[5,13.1],[7,33.6],[9,85.9],[11,219.9]]]);
-		$.mobile.changePage("#sentiment");
-		$.jqplot('chartdiv',  [[[1, 2],[3,5.12],[5,13.1],[7,33.6],[9,85.9],[11,219.9]]]);
-		return;
-		console.log("initCharts");
-		//$("#sentimentchartdiv").html('');
-		if(google.visualization === undefined) {
-			google.load("visualization", "1", {packages:["corechart", "annotatedtimeline"], callback: function() {app.initializeCharts3(callback);}});
-		} else {
-			console.log('initCharts')
-			app.initializeCharts3(false);
-		}
-	},
-	
-	
-	initializeCharts3: function(callback) {
-		console.log('initCharts3');
-		if(callback) {
-			console.log('initCharts3');
-			setTimeout(app.loadSentiments,3000);
-			
-		}
-		else {
-			$.mobile.changePage("#sentiment");
-		}
-	},
-	
 
-	
+	htmlencode: function(value) {
+        return $('<div/>').text(value).html();
+    },
 	
 	getYoutube: function(youtubevideo) {
 		var timepublished = new moment.utc(youtubevideo.Uploaded_on).local();
@@ -142,10 +123,9 @@ var app = {
 		$.ajax({
 			type       : "POST",
 			url        : PreCogURL+"/functions/frontend/extractyoutubedata.php",
-			//url        : 'http://127.0.0.1/youtube.php',
 			crossDomain: true,
-			beforeSend : function() {},
-			complete   : function() {},
+			beforeSend : function() { $.mobile.showPageLoadingMsg();},
+			complete   : function() { $.mobile.hidePageLoadingMsg();},
 			data       : {required : 'display', eventname : currentEvent},
 			dataType   : 'json',
 			success    : function(response) {
@@ -192,16 +172,16 @@ var app = {
 		return html;
 	},
 	
+    
 	loadGooglePlus: function() {
 		var PreCogURL = localStorage.getItem("PreCogURL");
 		var currentEvent = localStorage.getItem("currentEvent");
 		$.ajax({
 			type       : "POST",
 			url        : PreCogURL+"/functions/frontend/extractgoogleplusdata.php",
-			//url		   : 'http://127.0.0.1/google.php',
 			crossDomain: true,
-			beforeSend : function() {},
-			complete   : function() {},
+			beforeSend : function() { $.mobile.showPageLoadingMsg();},
+			complete   : function() { $.mobile.hidePageLoadingMsg();},
 			data       : {required : 'display', eventname : currentEvent},
 			dataType   : 'json',
 			success    : function(response) {			
@@ -221,6 +201,20 @@ var app = {
 		}); 
 	},
 	
+    getFlickr: function(flickrphoto) {
+		return '<img width="75" height="75" border="0" style="float:left" data-thumbdata="" class="pc_img" alt="'+flickrphoto.title+'" src="http://farm'+flickrphoto.farm+'.staticflickr.com/'+flickrphoto.server+'/'+flickrphoto.photo_id+'_'+flickrphoto.secret+'_s.jpg">';
+		html = '<div class="photo-display-item">'
+        		+'<div class="thumb">'
+            		+'<span class="photo_container pc_s">'
+						+'<a class="rapidnofollow" target="_blank" title="'+flickrphoto.title+'" href="http://www.flickr.com/photos/'+flickrphoto.nsid+'/'+flickrphoto.photo_id+'">'
+							+'<img width="75" height="75" border="0" data-thumbdata="" class="pc_img" alt="'+flickrphoto.title+'" src="http://farm'+flickrphoto.farm+'.staticflickr.com/'+flickrphoto.server+'/'+flickrphoto.photo_id+'_'+flickrphoto.secret+'_s.jpg">'
+						+'</a>'
+            		+'</span>'
+        		+'</div>'
+    		+'</div>';
+		return html;
+	},
+    
 	loadFlickr: function() {
 		var PreCogURL = localStorage.getItem("PreCogURL");
 		var currentEvent = localStorage.getItem("currentEvent");
@@ -228,16 +222,16 @@ var app = {
 			type       : "POST",
 			url        : PreCogURL+"/functions/frontend/extractflickrdata.php",
 			crossDomain: true,
-			beforeSend : function() {},
-			complete   : function() {},
+			beforeSend : function() { $.mobile.showPageLoadingMsg();},
+			complete   : function() { $.mobile.hidePageLoadingMsg();},
 			data       : {required : 'display', eventname : currentEvent},
 			dataType   : 'json',
 			success    : function(response) {
 				html  = '';
-				var jsonflickrdata = response; //JSON.parse(response);
+				var jsonflickrdata = response;
 				var resultcount = jsonflickrdata.results.length;
 				for (var i = 0; i < resultcount; i++) {
-					html += app.getformatedflickrphotohtml(jsonflickrdata.results[i]);
+					html += app.getFlickr(jsonflickrdata.results[i]);
 				}
 				$("#flickr-content").html(html);
 				$.mobile.navigate("#flickr");
@@ -275,14 +269,77 @@ var app = {
 	loadFacebookPosts: function(fromm,too,useridorname) {
 		var PreCogURL = localStorage.getItem("PreCogURL");
 		var currentEvent = localStorage.getItem("currentEvent");
+        postdata = {};
+        if (fromm === undefined && too === undefined) {
+			if (useridorname === undefined) {
+                // Normal POST for facebook posts
+				postdata       =  {required : 'display', eventname : currentEvent};
+			}
+            else {
+                // Facebook posts of a specific user
+                postdata       = {required : 'uadisplay', eventname : useridorname, more: 0 }
+						$.ajax({
+							type       : "POST",
+							url        : PreCogURL+"/functions/frontend/useranalysis/uacalldatascript.php",
+							crossDomain: true,
+							beforeSend : function() {$.mobile.showPageLoadingMsg();},
+							complete   : function() {
+								$.ajax({
+									type       : "POST",
+									url        : PreCogURL+"/functions/frontend/extractfacebookdata.php",
+									crossDomain: true,
+                                    beforeSend : function() { },
+                                    complete   : function() { },
+									data       : postdata,
+									dataType   : 'json',
+									success    : function(response) {
+										if (response == null) {
+											setTimeout(function(){ app.loadFacebookPosts(undefined,undefined,useridorname) },5000);
+                                            $.mobile.showPageLoadingMsg();
+                                            timeout = true;
+                                            return;
+										}
+										else {
+                                            $.mobile.hidePageLoadingMsg();
+											html = '<ul class="twitter-content-listview" data-role="listview">';
+											var jsonfbdata = response;
+                                            
+											var resultcount = jsonfbdata.results.length;
+											for (var i = 0; i < resultcount; i++) {
+												
+												html += app.getFacebook(jsonfbdata.results[i],true);
+											}
+											html += '</ul>	';
+
+											$("#facebook-content").html(html);
+											$.mobile.changePage("#facebook");
+											$('.timeago').timeago();
+										}
+									},
+									error      : function() {      
+									}
+								}); 
+							
+							},
+							data       : {network : 'facebook', useridorname : useridorname},
+							dataType   : 'json',
+							success    : function() {},
+							error      : function() {}
+						});
+						return;
+            }
+        }   
+        else {
+            // Historical Facebook posts
+            postdata       = {required : 'display', eventname : currentEvent, from: fromm, to: too}
+        }
 		$.ajax({
 			type       : "POST",
 			url        : PreCogURL+"/functions/frontend/extractfacebookdata.php",
-			//url		   : 'http://127.0.0.1/facebook.php',
 			crossDomain: true,
-			beforeSend : function() {},
-			complete   : function() {},
-			data       : {required : 'display', eventname : currentEvent},
+			beforeSend : function() { $.mobile.showPageLoadingMsg();},
+			complete   : function() { $.mobile.hidePageLoadingMsg();},
+			data       : postdata,
 			dataType   : 'json',
 			success    : function(response) {
 				html = '<ul class="twitter-content-listview" data-role="listview" data-split-icon="search" >';
@@ -317,19 +374,23 @@ var app = {
 							<p class="tweettext">'+twittertweet.tweet_text+'\</p>\
 							</a>';
 							if(divider === undefined) {
-							html += '<a onclick="app.loadTweets(undefined,undefined,\''+twittertweet.user_id+'\')" data-rel="dialog" data-transition="slideup">Load user tweets\
-									</a>\
-									</li>'
+							//html += '<a onclick="app.loadTweets(undefined,undefined,\''+twittertweet.user_id+'\')"  data-role="button" >Load user tweets\
+									//</a>';
+                                html += ' <div data-role="controlgroup" data-type="horizontal" >\
+                                            <a href="#popupBasic" data-rel="popup" data-role="button" data-icon="arrow-r" data-iconpos="right" >Analysis</a>\
+                                          </div> ';
+									
 							}
+                            html += '</li>';
 		return html;
 	},
 	
 	loadTweets: function(fromm,too,useridorname) {
-		console.log("LOADING TWEETS");
 		var PreCogURL = localStorage.getItem("PreCogURL");
 		var currentEvent = localStorage.getItem("currentEvent");
 		var tweetCount = localStorage.getItem("tweetCount");
 		tweetCount++;
+        timeout = false;
 		localStorage.setItem("tweetCount",tweetCount);
 		postdata = {};
 		if (fromm === undefined && too === undefined) {
@@ -342,23 +403,28 @@ var app = {
 							type       : "POST",
 							url        : PreCogURL+"/functions/frontend/useranalysis/uacalldatascript.php",
 							crossDomain: true,
-							beforeSend : function() {},
+							beforeSend : function() {$.mobile.showPageLoadingMsg();},
 							complete   : function() {
 								$.ajax({
 									type       : "POST",
 									url        : PreCogURL+"/functions/frontend/extracttwitterdata.php",
 									crossDomain: true,
-									beforeSend : function() {},
-									complete   : function() {},
+                                    beforeSend : function() { },
+                                    complete   : function() { },
 									data       : postdata,
 									dataType   : 'json',
 									success    : function(response) {
-										if (false && response == null) {
-											app.loadTweets(undefined,undefined,useridorname);
+										if (response == null) {
+											setTimeout(function(){ app.loadTweets(undefined,undefined,useridorname) },5000);
+                                            $.mobile.showPageLoadingMsg();
+                                            timeout = true;
+                                            return;
 										}
 										else {
-											html = '<ul class="twitter-content-listview" data-role="listview"   >';
+                                            $.mobile.hidePageLoadingMsg();
+											html = '<ul class="twitter-content-listview" data-role="listview">';
 											var jsontwitterdata = response;
+                                            
 											var resultcount = jsontwitterdata.results.length;
 											for (var i = 0; i < resultcount; i++) {
 												
@@ -391,8 +457,8 @@ var app = {
 			type       : "POST",
 			url        : PreCogURL+"/functions/frontend/extracttwitterdata.php",
 			crossDomain: true,
-			beforeSend : function() {},
-			complete   : function() {},
+			beforeSend : function() { $.mobile.showPageLoadingMsg();},
+			complete   : function() { $.mobile.hidePageLoadingMsg();},
 			data       : postdata,
 			dataType   : 'json',
 			success    : function(response) {
@@ -420,8 +486,8 @@ var app = {
 			type       : "POST",
 			url        : PreCogURL+"/functions/frontend/extracttwitterdatasentiment.php",
 			crossDomain: true,
-			beforeSend : function() {},
-			complete   : function() {},
+			beforeSend : function() { $.mobile.showPageLoadingMsg();},
+			complete   : function() { $.mobile.hidePageLoadingMsg(); $("#twitter-panel-right").panel('close');},
 			data       : {required : 'display', eventname : currentEvent, sentiment: 'positive'},
 			dataType   : 'json',
 			success    : function(response) {
@@ -449,8 +515,8 @@ var app = {
 			type       : "POST",
 			url        : PreCogURL+"/functions/frontend/extracttwitterdatasentiment.php",
 			crossDomain: true,
-			beforeSend : function() {},
-			complete   : function() {},
+			beforeSend : function() { $.mobile.showPageLoadingMsg();},
+			complete   : function() { $.mobile.hidePageLoadingMsg(); $("#twitter-panel-right").panel('close');},
 			data       : {required : 'display', eventname : currentEvent, sentiment: 'negative'},
 			dataType   : 'json',
 			success    : function(response) {
@@ -459,11 +525,8 @@ var app = {
 				var resultcount = jsontwitterdata.results.length;
 				for (var i = 0; i < resultcount; i++) {
 					html += app.getTweet(jsontwitterdata.results[i]);
-					//html += app.getformatedtwittertweethtml(jsontwitterdata.results[i]);
 				}
 				html += '</ul>	';
-				
-				
 				$("#twitter-content").html(html);
 				$.mobile.changePage("#twitter");
 				$('.timeago').timeago();
@@ -480,29 +543,33 @@ var app = {
 			currentTitleElement = titleElements[i];
 			currentTitleElement.innerText = currentEvent;
 		}
+        $("#main-panel").panel('close');
 	},
 	
-	loadSentiments: function() {
-		console.log("init");
-		var prefix = '';
+	loadSentiments: function(last24) {
+		oncethrough = 0;
 		var PreCogURL = localStorage.getItem("PreCogURL");
 		var currentEvent = localStorage.getItem("currentEvent");
-		//app.initializeCharts();
+
+        var prefix = '';
+        loadurl =  PreCogURL+"/functions/frontend/sentiment/extractsentimentdata.php";
+        if(last24) {
+            prefix = 'last24';
+            loadurl = PreCogURL+"/functions/frontend/extractgraphdata.php";
+        }
+        $('#'+prefix+'chartdiv').html('');
 		$.ajax({
 			type       : "POST",
-			url        : PreCogURL+"/functions/frontend/sentiment/extractsentimentdata.php",
+			url        : loadurl,
 			crossDomain: true,
-			beforeSend : function() {},
-			complete   : function() {},
+			beforeSend : function() { $.mobile.showPageLoadingMsg();},
+			complete   : function() { $.mobile.hidePageLoadingMsg();},
 			data       : {eventname : currentEvent},
 			dataType   : 'json',
 			success    : function(response) {
-				console.log("init3");
-				console.log(google.visualization);
-				var obj  = response; //JSON.parse(response);;
+				var obj  = response; 
 				if(obj && obj.results !== null) {
 					var count = obj.results.GooglePlus.length;
-					console.log("LENGTH IS "+count);
 					var post_array = [];
 					var post_count = [];
 
@@ -520,55 +587,79 @@ var app = {
 					var flickrPoints = [];
 					var endvalue = 0;
 					for (var i = 0; i < count; i++) {
-						gplusPoints.push([obj.results.GooglePlus[i].hour, obj.results.GooglePlus[i].count]);
-						fbPoints.push([obj.results.Facebook[i].hour, obj.results.Facebook[i].count]);
-						twitterPoints.push([obj.results.Twitter[i].hour, obj.results.Twitter[i].count]);
-						youtubePoints.push([obj.results.Youtube[i].hour, obj.results.Youtube[i].count]);
-						flickrPoints.push([obj.results.Flickr[i].hour, obj.results.Flickr[i].count]);
+                        if(oncethrough == 0) {
+                            minimum = obj.results.GooglePlus[i].hour;
+                            oncethrough++;
+                        }
+						gplusPoints.push([obj.results.GooglePlus[i].hour + ':00', obj.results.GooglePlus[i].count]);
+						fbPoints.push([obj.results.Facebook[i].hour + ':00', obj.results.Facebook[i].count]);
+						twitterPoints.push([obj.results.Twitter[i].hour + ':00', obj.results.Twitter[i].count]);
+						youtubePoints.push([obj.results.Youtube[i].hour + ':00', obj.results.Youtube[i].count]);
+						flickrPoints.push([obj.results.Flickr[i].hour + ':00', obj.results.Flickr[i].count]);
 					}
-								 
-					  var plot3 = $.jqplot('chartdiv', [gplusPoints, fbPoints, twitterPoints, youtubePoints, flickrPoints], 
+					
+                    console.log(gplusPoints);
+					  var plot3 = $.jqplot(prefix+'chartdiv', [gplusPoints, fbPoints, twitterPoints, youtubePoints, flickrPoints], 
 						{ 
-						  title:'Line Style Options', 
+						  title:'Sentiments', 
 						  // Series options are specified as an array of objects, one object
 						  // for each series.
-						   axes:{xaxis:{renderer:$.jqplot.DateAxisRenderer}},
+						  cursor:{
+                                    show: true,
+                                    zoom:true,
+                                    showTooltip:true
+                                },
+                          axes:{
+                               
+                               xaxis:{
+                                   labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+                                   label: 'Time of Day',
+                                   renderer:$.jqplot.DateAxisRenderer,
+                                   //min: minimum+':00',
+                                   
+                                   tickOptions:{formatString:'%R', showGridline: false},
+                                   tickInterval:'4 hours',
+                                   autoscale: true
+
+                               },
+                               yaxis: {
+                                    labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+                                    label: 'Sentiment'
+                               }
+                           },
 						    legend: {
 								show: true,
-								location: 'ne',     // compass direction, nw, n, ne, e, se, s, sw, w.
+								location: 's',     // compass direction, nw, n, ne, e, se, s, sw, w.
 								xoffset: 12,        // pixel offset of the legend box from the x (or x2) axis.
 								yoffset: 12,        // pixel offset of the legend box from the y (or y2) axis.
+                                placement: 'outside',
+                                renderer: $.jqplot.EnhancedLegendRenderer,
+                                rendererOptions: {
+                                    numberRows: 1
+                                }
 							},
 						   series:[ 
 							  {
-								// Change our line width and use a diamond shaped marker.
 								label: "Google+",
 								showLabel : true,
 								markerOptions: { style:'circle' }
 							  }, 
 							  {
-								// Don't show a line, just show markers.
-								// Make the markers 7 pixels with an 'x' style
 								label: "Facebook",
 								showLabel : true,
 								markerOptions: { style:"circle" }
 							  },
 							  { 
-								// Use (open) circlular markers.
 								label: "Twitter",
 								showLabel : true,
 								markerOptions: { style:"circle" }
 							  }, 
 							  {
-								// Use a thicker, 5 pixel line and 10 pixel
-								// filled square markers.
 								label: "Youtube",
 								showLabel : true,
 								markerOptions: { style:"circle" }
 							  },
 							  {
-								// Use a thicker, 5 pixel line and 10 pixel
-								// filled square markers.
 								label: "Flickr",
 								showLabel : true,
 								markerOptions: { style:"circle" }
@@ -576,8 +667,11 @@ var app = {
 						  ]
 						});
 				}
-				
-				$.mobile.changePage("#sentiment");
+				if(last24) {
+				    $.mobile.changePage("#last24");
+                } else {
+                    $.mobile.changePage("#sentiment");
+                }
 			},
 			error      : function() {}
 		}); 
@@ -592,17 +686,17 @@ var app = {
 			type       : "POST",
 			url        : PreCogURL+"/functions/frontend/stats.php",
 			crossDomain: true,
-			beforeSend : function() {},
-			complete   : function() {},
+			beforeSend : function() { $.mobile.showPageLoadingMsg();},
+			complete   : function() { $.mobile.hidePageLoadingMsg();},
 			data       : {functionname : 'geteventnames'},
 			dataType   : 'json',
 			success    : function(response) {
-				var jsondata = response; //JSON.parse(response);
-				var html = '<ul data-filter="true" data-role="listview" id="main-panel-listview">';//'<div class="ui-panel-inner"><ul data-role="listview" class="ui-listview">';
+				var jsondata = response; 
+				var html = '<ul data-filter="true" data-role="listview" id="main-panel-listview">';
 				$.each(jsondata, function(i, v) {
 					html += '<li class="clickable eventlistItems" onclick="app.changeevent(\''+v.eventname+'\')">'+v.eventname+'</li>';
 				});
-				html += '</ul>';//</div>';
+				html += '</ul>';
 				$('#main-panel').html(html);
 				$('#main-panel-listview').trigger('updatelayout');
 				$("#main-panel-listview").listview().listview("refresh");

@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <!--
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file
@@ -17,140 +18,249 @@
     specific language governing permissions and limitations
     under the License.
 -->
+
 <html>
     <head>
         <meta charset="utf-8" />
         <meta name="format-detection" content="telephone=no" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, target-densitydpi=medium-dpi, user-scalable=0" />
+        <link rel="stylesheet" href="font-awesome/css/font-awesome.min.css">
+        <link href="http://fonts.googleapis.com/css?family=Arvo|Open+Sans:400,300,600,700" rel="stylesheet" type="text/css" />
 		<link rel="stylesheet" type="text/css" href="css/jquery.mobile-1.3.2.min.css">
 		<link rel="stylesheet" type="text/css" href="css/jquery.jqplot.css">
-		        <link rel="stylesheet" type="text/css" href="css/index.css" />
+        <link rel="stylesheet" type="text/css" href="css/mobipick.css" />
+        <link rel="stylesheet" type="text/css" href="css/index.css" />
         <title>MultiOSN</title>
     </head>
 	
     <body>
 		<!-- Main Page -->
         <div data-role="page" id="page-home" data-theme="c">
-			<!-- Panel -->
-			<div data-role="panel" id="main-panel">
-				<ul data-role="listview" id="main-panel-listview">
-				</ul>
-			</div>
-			<!-- Header -->
-			<div data-role="header" data-position="fixed" data-tap-toggle="false">
-				<a href="#main-panel" data-rel="open" data-role="button" class="ui-btn-left events" data-icon="bars">Events</a>
-				<h3 class="currentEventTitle" style="text-transform:none">mutliOSN</h3>
-				
-			</div>
 			<!-- Content -->
 			<div id="home-content" data-role="content">
+                <h1 class="ui-title title" tabindex="0" role="heading" aria-level="1" style="font-size:30pt;font-family:'Arvo';margin:20px;"><text style="color:#323030">multi</text><text style="color:#107710">osn</text></h1>
 				<ul data-role="listview" class="homeList">
-					<li class="homeItems"><a href="#sentiment">Sentiments</a></li>
-					<li class="homeItems"><a href="#twitter">Tweets</a></li>
-					<li class="homeItems"><a href="#facebook">Facebook Feed</a></li>
-					<li class="homeItems"><a href="#flickr">Flickr</a></li>
-					<li class="homeItems"><a href="#googleplus">Google+</a></li>
-					<li class="homeItems"><a href="#youtube">Youtube</a></li>
-					<li class="homeItems"><a href="#last24">Last 24 Hours</a></li>
+                    <li class="homeItems topcurved"><a href="#globe" data-transition="slideup"><i class="fa fa-globe"></i> Around the Globe</a></li>
+					<li class="homeItems"><a onclick="localStorage.setItem('GraphMode','');" href="#sentiment" data-transition="slideup"><i class="fa fa-bar-chart-o"></i> Sentiments</a></li>
+                    <li class="homeItems"><a onclick="localStorage.setItem('GraphMode','');" href="#last24" data-transition="slideup"><i class="fa fa-bar-chart-o"></i> Last 24 Hours</a></li>
+                    <li class="homeItems"><a onclick="localStorage.setItem('TagCloud','all');" href="#tagcloud" data-transition="slideup"><i class="fa fa-cloud"></i> Tag Clouds</a></li>
+					<li class="homeItems"><a href="#twitter" data-transition="slideup"><i class="fa fa-twitter"></i> Tweets</a></li>
+					<li class="homeItems"><a href="#facebook" data-transition="slideup"><i class="fa fa-facebook"></i> Facebook Feed</a></li>
+					<li class="homeItems"><a href="#flickr" data-transition="slideup"><i class="fa fa-flickr"></i> Flickr</a></li>
+					<li class="homeItems"><a href="#googleplus" data-transition="slideup"><i class="fa fa-google-plus"></i> Google+</a></li>
+					<li class="homeItems bottomcurved"><a href="#youtube" data-transition="slideup"><i class="fa fa-youtube"></i> Youtube</a></li>
 				</ul>
+                <ul data-role="listview" class="homeList" style="width:100%">
+                    <li class="homeItems topcurved bottomcurved" data-icon="false"><a href="#eventsPage" data-transition="slideup">Currenty Showing: <span id="currentEvent">Mumbai</span> <i class="fa fa-cog"></i></a></li>
+                </ul>
 			</div>
 		</div>
-
+        
+        <!-- Globe Page -->
+        <div data-role="page" id="globe" data-theme="c">
+			<!-- Header -->
+			<div data-role="header" data-position="fixed" data-tap-toggle="false"> 
+				<a href="index.html" data-role="button" class="ui-btn-left" data-transition="slidedown"><i class="fa fa-arrow-left"></i></a>
+				<h3 class="currentEventTitle"></h3>
+			</div>
+			<!-- Content -->
+            <div id="map-canvas"  style="position:absolute; width:100%; height:100%;" data-role="content">
+            </div>
+		</div>
+        
+        
+        <!-- Events Page -->
+        <div data-role="page" id="eventsPage" data-theme="c">
+			<!-- Header -->
+			<div data-role="header" data-position="fixed" data-tap-toggle="false"> 
+				<a href="index.html" data-role="button" class="ui-btn-left" data-transition="slidedown"><i class="fa fa-arrow-left"></i></a>
+				<h3 class="currentEventTitle"></h3>
+			</div>
+			<!-- Content -->
+			<div id="eventsPage-content"  data-role="content">
+			</div>
+		</div>
+        
+        
 		<!-- Sentiment Page -->
         <div data-role="page" id="sentiment" data-theme="c">
 			<!-- Panel -->
 			<!-- Header -->
 			<div data-role="header" data-position="fixed" data-tap-toggle="false"> 
-				<a href="index.html" data-role="button" class="ui-btn-left" data-icon="back">Back</a>
-				<h3 class="currentEventTitle"></h3>
+				<a href="index.html" data-role="button" class="ui-btn-left" data-transition="slidedown"><i class="fa fa-arrow-left"></i></a>
+				<h3 class="currentEventTitle" ></h3>
+                <div class="ui-btn-right" data-role="controlgroup" data-type="horizontal">
+                  <a href="#" onclick="app.refreshPage();" data-role="button"><i class="fa fa-refresh"></i></a>
+                </div>
 			</div>
 			<!-- Content -->
-			<div id="chartdiv" style="width: 100%; height: 100%; position: relative;" data-role="content">
+			<div id="chartdiv" data-role="content">
 			</div>
 		</div>
         
-        <!-- Last 24 Hours Page -->
-        <div data-role="page" id="last24" data-theme="c">
-			<!-- Panel -->
+        
+        <!-- Tag Cloud Page -->
+        <div data-role="page" id="tagcloud" data-theme="c">
 			<!-- Header -->
 			<div data-role="header" data-position="fixed" data-tap-toggle="false"> 
-				<a href="index.html" data-role="button" class="ui-btn-left" data-icon="back">Back</a>
+				<a href="index.html" data-role="button" class="ui-btn-left" data-transition="slidedown"><i class="fa fa-arrow-left"></i></a>
+				<h3 class="currentEventTitle" id="tagcloud"></h3>
+                <div class="ui-btn-right" data-role="controlgroup" data-type="horizontal">
+                  <a href="#" onclick="app.refreshPage();" data-role="button"><i class="fa fa-refresh"></i></a>
+                </div>
+			</div>
+            <div id="wordcloud" data-role="content" style="z-index:5;width:100%;position:absolute;height:100%;overflow:hidden;">
+               
+                
+            </div>
+		</div>
+        
+        
+        
+        <!-- Last 24 Hours Page -->
+        <div data-role="page" id="last24" data-theme="c">
+			<!-- Header -->
+			<div data-role="header" data-position="fixed" data-tap-toggle="false"> 
+				<a href="index.html" data-role="button" class="ui-btn-left" data-transition="slidedown"><i class="fa fa-arrow-left"></i></a>
 				<h3 class="currentEventTitle"></h3>
+                <div class="ui-btn-right" data-role="controlgroup" data-type="horizontal">
+                  <a href="#" onclick="app.refreshPage();" data-role="button"><i class="fa fa-refresh"></i></a>
+                </div>
 			</div>
 			<!-- Content -->
-			<div id="last24chartdiv" style="width: 100%; height: 100%; position: relative;" data-role="content">
+			<div id="last24chartdiv" data-role="content">
 			</div>
 		</div>
 		
+        
+   
+        
 		<!-- Twitter Page -->
         <div data-role="page" id="twitter" data-theme="c">
 			<!-- Panel -->
 			<div data-role="panel" id="twitter-panel-right" data-position="right">
 				<ul data-role="listview">
+                    <li class="rightItems"><a onclick="app.showDatepicker('twitter-content', 'twitter');" href="#">Historical</a></li>
+                    <li class="rightItems"><a onclick="localStorage.setItem('TagCloud','twitter');" href="#tagcloud">Tag Cloud</a></li>
 					<li class="rightItems"><a onclick="app.loadPositiveTweets();">+ve Sentiment</a></li>
 					<li class="rightItems"><a onclick="app.loadNegativeTweets()">-ve Sentiment</a></li>
 				</ul>
 			</div>
 			<!-- Header -->
 			<div data-role="header" data-position="fixed" data-tap-toggle="false"> 
-				<a href="index.html" data-role="button" class="ui-btn-left" data-icon="back">Back</a>
-				<h3 class="currentEventTitle"></h3>
-				<a href="#twitter-panel-right" data-rel="open" data-role="button" class="ui-btn-right" data-icon="setings">Options</a>
+				<a href="index.html" data-role="button" class="ui-btn-left" data-transition="slidedown"><i class="fa fa-arrow-left"></i></a>
+				<h3 class="currentEventTitle" id="twitter"></h3>
+				
+                <div class="ui-btn-right" data-role="controlgroup" data-type="horizontal">
+                  <a href="#" onclick="app.refreshPage();" data-role="button"><i class="fa fa-refresh"></i></a>
+                  <a href="#twitter-panel-right" data-rel="open" data-role="button" data-icon="setings">Options</a>
+                </div>
 			</div>
+            <!-- Popup -->
             <div data-role="popup" id="popupBasic" data-theme="a" class="ui-popup ui-body-a ui-overlay-shadow ui-corner-all">
 				<ul data-role="listview" data-inset="true" style="min-width:210px;" data-theme="b" class="ui-listview ui-listview-inset ui-corner-all ui-shadow ui-group-theme-b">
 					
-					<li><a href="options.html" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Options</a></li>
-					<li><a href="methods.html" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Methods</a></li>
-					<li class="ui-last-child"><a href="events.html" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Events</a></li>
+                    <li onclick="$('#popupbasic').popup('close'); app.loadTweets(undefined,undefined,localStorage.getItem('ID'));" class="ui-last-child"><a href="#twitter" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Tweets</a></li>
+               
+					<li><a onclick="localStorage.setItem('GraphMode','twitter');" href="#sentiment" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Sentiment Graph</a></li>
+					<li><a onclick="localStorage.setItem('GraphMode','twitter');" href="#last24" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Posts Graph</a></li>
+					
 				</ul>
-		</div>
+		    </div>
 			<!-- Content -->
 			<div id="twitter-content" data-role="content">
 			</div>
 		</div>
 		
+        
+        
 		<!-- Facebook Page -->
         <div data-role="page" id="facebook" data-theme="c">
 			<!-- Panel -->
 			<div data-role="panel" id="facebook-panel-right" data-position="right">
 				<ul data-role="listview">
-					<li class="rightItems"><a onclick="app.loadPositiveTweets()">+ve Sentiment</a></li>
-					<li class="rightItems"><a onclick="app.loadNegativeTweets()">-ve Sentiment</a></li>
+                    <li class="rightItems"><a onclick="app.showDatepicker('facebook-content', 'facebook');" href="#">Historical</a></li>
+                    <li class="rightItems"><a onclick="localStorage.setItem('TagCloud','facebook');" href="#tagcloud">Tag Cloud</a></li>
 				</ul>
 			</div>
 			<!-- Header -->
 			<div data-role="header" data-position="fixed" data-tap-toggle="false"> 
-					<a href="index.html" data-role="button" class="ui-btn-left" data-icon="back">Back</a>
-					<h3 class="currentEventTitle"></h3>
-					<a href="#facebook-panel-right" data-rel="open" data-role="button" class="ui-btn-right" data-icon="setings">Options</a>
+					<a href="index.html" data-role="button" class="ui-btn-left" data-transition="slidedown"><i class="fa fa-arrow-left"></i></a>
+					<h3 class="currentEventTitle" id="facebook"></h3>
+                
+                    <div class="ui-btn-right" data-role="controlgroup" data-type="horizontal">
+                        <a href="#" onclick="app.refreshPage();" data-role="button"><i class="fa fa-refresh"></i></a>
+                        <a href="#facebook-panel-right" data-rel="open" data-role="button" data-icon="setings">Options</a>
+                    </div>
 			</div>
+            <!-- Popup -->
+            <div data-role="popup" id="popupFacebook" data-theme="a" class="ui-popup ui-body-a ui-overlay-shadow ui-corner-all">
+				<ul data-role="listview" data-inset="true" style="min-width:210px;" data-theme="b" class="ui-listview ui-listview-inset ui-corner-all ui-shadow ui-group-theme-b">
+					
+                    <li onclick="$('#popupFacebook').popup('close'); app.loadFacebookPosts(undefined,undefined,localStorage.getItem('ID'));" class="ui-last-child"><a href="#facebook" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Posts</a></li>
+               
+					<li><a onclick="localStorage.setItem('GraphMode','facebook');" href="#sentiment" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Sentiment Graph</a></li>
+					<li><a onclick="localStorage.setItem('GraphMode','facebook');" href="#last24" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Posts Graph</a></li>
+					
+				</ul>
+		    </div>
 			<!-- Content -->
 			<div id="facebook-content" data-role="content">
 			</div>
 		</div>
 		
+        
 		<!-- Flickr Page -->
         <div data-role="page" id="flickr" data-theme="c">
 			<!-- Panel -->
+			<div data-role="panel" id="flickr-panel-right" data-position="right">
+				<ul data-role="listview">
+                    <li class="rightItems"><a onclick="localStorage.setItem('TagCloud','flickr');" href="#tagcloud">Tag Cloud</a></li>
+				</ul>
+			</div>
 			<!-- Header -->
 			<div data-role="header" data-position="fixed" data-tap-toggle="false">
-				<a href="index.html" data-role="button" class="ui-btn-left" data-icon="back">Back</a>
-				<h3 class="currentEventTitle"></h3>
+				<a href="index.html" data-role="button" class="ui-btn-left" data-transition="slidedown"><i class="fa fa-arrow-left"></i></a>
+				<h3 class="currentEventTitle" id="flickr"></h3>
+                <div class="ui-btn-right" data-role="controlgroup" data-type="horizontal">
+                  <a href="#" onclick="app.refreshPage();" data-role="button"><i class="fa fa-refresh"></i></a>
+                  <a href="#flickr-panel-right" data-rel="open" data-role="button" data-icon="setings">Options</a>
+                </div>
 			</div>
 			<!-- Content -->
 			<div id="flickr-content" data-role="content">
 			</div>
 		</div>
 		
+        
 		<!-- G+ Page -->
         <div data-role="page" id="googleplus" data-theme="c">
 			<!-- Panel -->
+			<div data-role="panel" id="google-panel-right" data-position="right">
+				<ul data-role="listview">
+                    <li class="rightItems"><a onclick="localStorage.setItem('TagCloud','googleplus');" href="#tagcloud">Tag Cloud</a></li>
+				</ul>
+			</div>
 			<!-- Header -->
 			<div data-role="header" data-position="fixed" data-tap-toggle="false">
-				<a href="index.html" data-role="button" class="ui-btn-left" data-icon="back">Back</a>
-				<h3 class="currentEventTitle"></h3>
+				<a href="index.html" data-role="button" class="ui-btn-left" data-transition="slidedown"><i class="fa fa-arrow-left"></i></a>
+				<h3 class="currentEventTitle" id="google-plus"></h3>
+                <div class="ui-btn-right" data-role="controlgroup" data-type="horizontal">
+                  <a href="#" onclick="app.refreshPage();" data-role="button"><i class="fa fa-refresh"></i></a>
+                  <a href="#google-panel-right" data-rel="open" data-role="button" data-icon="setings">Options</a>
+                </div>
 			</div>
+            <!-- Popup -->
+            <div data-role="popup" id="popupGoogle" data-theme="a" class="ui-popup ui-body-a ui-overlay-shadow ui-corner-all">
+				<ul data-role="listview" data-inset="true" style="min-width:210px;" data-theme="b" class="ui-listview ui-listview-inset ui-corner-all ui-shadow ui-group-theme-b">
+					
+                    <li onclick="$('#popupGoogle').popup('close'); app.loadGooglePlus(undefined,undefined,localStorage.getItem('ID'));" class="ui-last-child"><a href="#googleplus" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Posts</a></li>
+               
+					<li><a onclick="localStorage.setItem('GraphMode','googleplus');" href="#sentiment" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Sentiment Graph</a></li>
+					<li><a onclick="localStorage.setItem('GraphMode','googleplus');" href="#last24" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Posts Graph</a></li>
+					
+				</ul>
+		    </div>
 			<!-- Content -->
 			<div id="google-content" data-role="content">
 			</div>
@@ -159,10 +269,19 @@
 		<!-- Youtube Page -->
         <div data-role="page" id="youtube" data-theme="c">
 			<!-- Panel -->
+			<div data-role="panel" id="youtube-panel-right" data-position="right">
+				<ul data-role="listview">
+                    <li class="rightItems"><a onclick="localStorage.setItem('TagCloud','youtube');" href="#tagcloud">Tag Cloud</a></li>
+				</ul>
+			</div>
 			<!-- Header -->
 			<div data-role="header" data-position="fixed" data-tap-toggle="false">
-				<a href="index.html" data-role="button" class="ui-btn-left" data-icon="back">Back</a>
-				<h3 class="currentEventTitle"></h3>
+				<a href="index.html" data-role="button" class="ui-btn-left" data-transition="slidedown" ><i class="fa fa-arrow-left"></i></a>
+				<h3 class="currentEventTitle" id="youtube"></h3>
+                <div class="ui-btn-right" data-role="controlgroup" data-type="horizontal">
+                  <a href="#" onclick="app.refreshPage();" data-role="button"><i class="fa fa-refresh"></i></a>
+                  <a href="#youtube-panel-right" data-rel="open" data-role="button" data-icon="setings">Options</a>
+                </div>
 			</div>
 			<!-- Content -->
 			<div id="youtube-content" data-role="content">
@@ -182,6 +301,11 @@
 		<script type="text/javascript" src="js/jqplot.canvasAxisLabelRenderer.min.js"></script>
 		<script type="text/javascript" src="js/jqplot.dateAxisRenderer.min.js"></script>
         <script type="text/javascript" src="js/jqplot.enhancedLegendRenderer.min.js"></script>
+        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3&sensor=true"></script>
+        <script type="text/javascript" src="js/jquery.awesomeCloud-0.2.min.js"></script>
+        <script type="text/javascript" src="js/xdate.js"></script>
+        <script type="text/javascript" src="js/xdate.i18n.js"></script>
+        <script type="text/javascript" src="js/mobipick.js"></script>
 		<script type="text/javascript" src="js/index.js"></script>
 
         <script type="text/javascript">

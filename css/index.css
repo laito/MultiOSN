@@ -166,6 +166,8 @@ li.clickable {
 	width:165px;
 }
 
+
+
 .my_icon_wrapper {
         float: left; 
         width: 55px; height: 48px;
@@ -180,6 +182,13 @@ li.clickable {
 	padding:15px !important;
 
 }
+.title {
+    text-transform: none !important;
+	text-shadow: none !important;
+	box-shadow: none !important;
+	-webkit-box-shadow: none !important;
+}
+
  .eventlistItems {
 	text-transform: none !important;
 	text-shadow: none !important;
@@ -188,7 +197,34 @@ li.clickable {
 	background-image:url('ANYNONEXISTINGIMAGE') !important;
  }
  
-.tweet-listview-item, .homeItems, .rightItems {
+.homeItems {
+    border:0 !important;
+    border-radius:0px !important;
+	background-color:#fff !important;
+	text-shadow: none !important;
+	box-shadow: none !important;
+	text-transform: none !important;
+	-webkit-box-shadow: none !important;
+	background-color:#ffffff !important;
+    border:none !important;
+    border-bottom: 0px solid #eeeeee !important;
+    background-image:url('ANYNONEXISTINGIMAGE') !important;
+}
+
+.topcurved {
+    border-top-left-radius:6px !important;
+    
+    border-top-right-radius:6px !important;
+}
+
+
+.bottomcurved {
+    border-bottom-left-radius:6px !important;
+    
+    border-bottom-right-radius:6px !important;
+}
+
+.tweet-listview-item, .rightItems {
 	border-radius:5px !important;
 	background-color:#fff !important;
 	margin: 10px !important;
@@ -207,3 +243,48 @@ li.clickable {
 	color:#999 !important;
 }
 
+.osnheader {
+    border:0;
+    background:#f9f9f9;
+    background-image:url('ANYNONEXISTINGIMAGE') !important;
+}
+
+#flickr img {
+    padding:5px;
+    margin:5px;
+    border-radius:12px !important;
+}
+
+.filterbtn {
+    padding:7px;
+    border-radius:5px;
+    text-shadow: none !important;
+	box-shadow: none !important;
+	text-transform: none !important;
+	-webkit-box-shadow: none !important;
+    border:none !important;
+}
+.filterbtn > i,button {
+    padding:5px;
+}
+.row {
+    display: table-row;
+}
+.cell {
+    display: table-cell;
+}
+.table {
+    display: table;
+}
+.datebox {
+    border-radius:5px;
+    border:1px solid #999;
+    padding:3px;
+}
+
+.notice {
+    padding:10px;
+    border-radius:5px;
+    text-transform: none;
+    background-color:#dff0d8;
+}

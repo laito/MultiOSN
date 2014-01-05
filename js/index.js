@@ -30,7 +30,7 @@ var app = {
 		
 		for(i = 0; i < titleElements.length; i++) {
 			currentTitleElement = titleElements[i];
-			currentTitleElement.innerText = currentEvent;
+			currentTitleElement.innerHTML = '<i class="fa fa-'+currentTitleElement.id+'"></i> '+currentEvent;
 		}
         
         this.bindEvents();
@@ -53,6 +53,12 @@ var app = {
 			  $('.ui-page-active :jqmData(role=content)').trigger('create');
 		});
         
+        
+        $("#globe").on('pageshow', function() {
+			app.loadMap();
+		});
+        
+        
 		$("#sentiment").on('pageshow', function() {
 			app.loadSentiments();
 		});
@@ -62,6 +68,18 @@ var app = {
 		});
         
         $("#page-home").on('pageshow', function() {
+			localStorage.setItem('GraphMode','');
+                        
+            $("#facebook-content").html('');
+            $("#twitter-content").html('');
+            $("#flickr-content").html('');
+            $("#google-content").html('');
+            $("#youtube-content").html('');
+            $("#chartdiv").html('');
+            $("#last24chartdiv").html('');
+		});
+        
+        $("#eventsPage").on('pageshow', function() {
 			app.geteventnames();
 		});
         
@@ -84,6 +102,10 @@ var app = {
         $("#facebook").on('pageshow', function() {
 			app.loadFacebookPosts();
 		});
+         
+        $("#tagcloud").on('pageshow', function() {
+			app.loadTagCloud();
+		});
         
         
     },
@@ -101,6 +123,384 @@ var app = {
 	htmlencode: function(value) {
         return $('<div/>').text(value).html();
     },
+    
+    loadTagCloud: function(user) {
+        var osn = localStorage.getItem('TagCloud');
+        var PreCogURL = localStorage.getItem("PreCogURL");
+		var currentEvent = localStorage.getItem("currentEvent");
+        if(user !== undefined) {
+            url = '/functions/frontend/uagettagcloud.php';
+            postdata = {eventname: currentEvent, osn: osn};
+        } else {
+            url = '/functions/frontend/tagcloudscripts/gettagcloud.php';
+            postdata = {eventname: currentEvent, osn: osn};
+        }
+        $.ajax({
+			type       : "POST",
+			url        : PreCogURL+url,
+			crossDomain: true,
+			beforeSend : function() { $.mobile.showPageLoadingMsg();},
+			complete   : function() { $.mobile.hidePageLoadingMsg();},
+			data       : postdata,
+			dataType   : 'html',
+			success    : function(response) {
+                 console.log("QWEWASDSQE");
+                 console.log(response);
+                response = response.replace(/<ul>/g,'');
+                response = response.replace(/<li>/g,'');
+                response = response.replace(/<\/ul>/g,'');
+                response = response.replace(/<\/li>/g,'');
+                response = response.replace(/a href="#"/g,'span')
+                response = response.replace(/<\/a>/g,'</span>');
+                console.log(response);
+                $("#wordcloud").html(response);
+                var settings = {
+                    "size" : {
+                        "grid" : 16
+                    },
+                    "options" : {
+                        "color" : "random-dark",
+                        "printMultiplier" : 3
+                    },
+                    "font" : "Futura, Helvetica, sans-serif",
+                    "shape" : "square"
+                }
+                $( "#wordcloud" ).awesomeCloud( settings );
+            },
+            error      : function() {}
+        }); 
+        
+        
+    },
+    
+    setGooglePlusMarkers: function(map, user) {
+        var PreCogURL = localStorage.getItem("PreCogURL");
+		var currentEvent = localStorage.getItem("currentEvent");
+        var image = {
+          url: 'img/googleplusmarker.png',
+        };
+        var shape = {
+            coord: [1, 1, 1, 20, 18, 20, 18 , 1],
+            type: 'poly'
+        };
+        var infoWindow = [];
+        var required = 'map';
+        if(user !== undefined) {
+            required = 'uamap';
+        }
+        // AJAX Call
+		$.ajax({
+			type       : "POST",
+			url        : PreCogURL+"/functions/frontend/extractgoogleplusdata.php",
+			crossDomain: true,
+			beforeSend : function() { $.mobile.showPageLoadingMsg();},
+			complete   : function() { $.mobile.hidePageLoadingMsg();},
+			data       : {required : required, eventname : currentEvent},
+			dataType   : 'json',
+			success    : function(response) {
+				
+                if(response) {
+                    obj = response;
+                    var count = obj.results.length;
+                    for (var i = 0; i < count; i++) {
+                        var post = obj.results[i];
+                        
+                        var html = app.getGoogle(post);
+                        var myLatLng = new google.maps.LatLng(post.position_latitude, post.position_longitude);
+                        var marker = new google.maps.Marker({
+                          position: myLatLng,
+                          map: map,
+                          icon: image,
+                          shape: shape,
+                          html: html,
+                        });
+                      
+                        var infoWindow = new google.maps.InfoWindow();
+                            google.maps.event.addListener(marker, 'click', function() {
+                                infoWindow.setContent(this.html);
+                                infoWindow.open(map,this);
+                            });
+                    }    
+                }
+                
+				//$.mobile.changePage("#globe");
+			},
+			error      : function() {      
+			}
+		}); 
+        $('.useranalysismaploader').css('display', 'none');
+        
+    },
+    
+    setFacebookMarkers: function(map, user) {
+        var PreCogURL = localStorage.getItem("PreCogURL");
+		var currentEvent = localStorage.getItem("currentEvent");
+        var image = {
+          url: 'img/facebookmarker.png',
+        };
+        var shape = {
+            coord: [1, 1, 1, 20, 18, 20, 18 , 1],
+            type: 'poly'
+        };
+        var infoWindow = [];
+        var required = 'map';
+        if(user !== undefined) {
+            required = 'uamap';
+        }
+        // AJAX Call
+        $.ajax({
+			type       : "POST",
+			url        : PreCogURL+"/functions/frontend/extractfacebookdata.php",
+			crossDomain: true,
+			beforeSend : function() { $.mobile.showPageLoadingMsg();},
+			complete   : function() { $.mobile.hidePageLoadingMsg();},
+			data       : {required : required, eventname : currentEvent},
+			dataType   : 'json',
+			success    : function(response) {
+                if(response) {
+                    obj = response;
+                    var count = obj.results.length;
+                    for (var i = 0; i < count; i++) {
+                        var post = obj.results[i];
+                        
+                        var html = app.getFacebook(post);
+                        html = html.replace("<br />", "");
+                        var myLatLng = new google.maps.LatLng(post.latitude, post.longitude);
+                           var marker = new google.maps.Marker({
+                              position: myLatLng,
+                              map: map,
+                              icon: image,
+                              shape: shape,
+                              title: post.message,
+                              html: html,
+                            });
+                      
+                       
+                        var infoWindow = new google.maps.InfoWindow();
+                            google.maps.event.addListener(marker, 'click', function() {
+                                infoWindow.setContent(this.html);
+                                infoWindow.open(map,this);
+                            });
+                    }    
+                }
+                
+				//$.mobile.changePage("#globe");
+			},
+			error      : function() {      
+			}
+		}); 
+        $('.useranalysismaploader').css('display', 'none');
+    },
+    
+    setTwitterMarkers: function(map, user) {
+        var PreCogURL = localStorage.getItem("PreCogURL");
+		var currentEvent = localStorage.getItem("currentEvent");
+        var image = {
+          url: 'img/twittermarker.png',
+        };
+        var shape = {
+            coord: [1, 1, 1, 20, 18, 20, 18 , 1],
+            type: 'poly'
+        };
+        var infoWindow = [];
+        var required = 'map';
+        if(user !== undefined) {
+            required = 'uamap';
+        }
+        // AJAX Call
+        $.ajax({
+			type       : "POST",
+			url        : PreCogURL+"/functions/frontend/extracttwitterdata.php",
+			crossDomain: true,
+			beforeSend : function() { $.mobile.showPageLoadingMsg();},
+			complete   : function() { $.mobile.hidePageLoadingMsg();},
+			data       : {required : required, eventname : currentEvent},
+			dataType   : 'json',
+			success    : function(response) {
+				
+                if(response) {
+                    obj = response;
+                    var count = obj.results.length;
+                    for (var i = 0; i < count; i++) {
+                        var post = obj.results[i];
+                        
+                        var html = app.getTweet(post);
+                        var tcoordinates = post.tweet_coordinates.split("[");
+                        var longitude = tcoordinates[1].split(",");
+                        var latitude = longitude[1].split("]");
+                        var myLatLng = new google.maps.LatLng(latitude[0], longitude[0]);
+                        var marker = new google.maps.Marker({
+                          position: myLatLng,
+                          map: map,
+                          icon: image,
+                          shape: shape,
+                          title: post.tweet_text,
+                          html: html
+                        });
+                      
+                        var infoWindow = new google.maps.InfoWindow();
+                            google.maps.event.addListener(marker, 'click', function() {
+                                infoWindow.setContent(this.html);
+                                infoWindow.open(map,this);
+                            });
+                    }    
+                }
+                
+				//$.mobile.changePage("#globe");
+			},
+			error      : function() {      
+			}
+		}); 
+        $('.useranalysismaploader').css('display', 'none');
+    },
+    
+    setYoutubeMarkers: function(map, user) {
+        var PreCogURL = localStorage.getItem("PreCogURL");
+		var currentEvent = localStorage.getItem("currentEvent");
+        var image = {
+          url: 'img/youtubemarker.png',
+        };
+        var shape = {
+            coord: [1, 1, 1, 20, 18, 20, 18 , 1],
+            type: 'poly'
+        };
+        var infoWindow = [];
+        var required = 'map';
+        if(user !== undefined) {
+            required = 'uamap';
+        }
+        // AJAX Call
+        $.ajax({
+			type       : "POST",
+			url        : PreCogURL+"/functions/frontend/extractyoutubedata.php",
+			crossDomain: true,
+			beforeSend : function() { $.mobile.showPageLoadingMsg();},
+			complete   : function() { $.mobile.hidePageLoadingMsg();},
+			data       : {required : required, eventname : currentEvent},
+			dataType   : 'json',
+			success    : function(response) {
+				
+                if(response) {
+                    obj = response;
+                    var count = obj.results.length;
+                    for (var i = 0; i < count; i++) {
+                        var post = obj.results[i];
+                        var html = app.getYoutube(post);
+                        var myLatLng = new google.maps.LatLng(post.lat, post.lon);
+                        var marker = new google.maps.Marker({
+                          position: myLatLng,
+                          map: map,
+                          icon: image,
+                          shape: shape,
+                          title: post.Video_title,
+                          html: html,
+                        });
+                      
+                        var infoWindow = new google.maps.InfoWindow();
+                        google.maps.event.addListener(marker, 'click', function() {
+                            infoWindow.setContent(this.html);
+                            infoWindow.open(map,this);
+                        });
+                    }    
+                }
+                
+				//$.mobile.changePage("#globe");
+			},
+			error      : function() {      
+			}
+		}); 
+        $('.useranalysismaploader').css('display', 'none');
+    },
+    
+    filter: function(network) {
+        
+        from = $("#from").attr('epoch');
+        to = $("#to").attr('epoch');
+        console.log(network);
+        if(network === 'twitter') {
+            app.loadTweets(from,to);
+        }
+        else if(network === 'facebook') {
+            app.loadFacebookPosts(from,to);
+        }
+    },
+    
+    setFlickrMarkers: function(map, user) {
+        var PreCogURL = localStorage.getItem("PreCogURL");
+		var currentEvent = localStorage.getItem("currentEvent");
+        var image = {
+          url: 'img/flickrmarker.png',
+        };
+        var shape = {
+            coord: [1, 1, 1, 20, 18, 20, 18 , 1],
+            type: 'poly'
+        };
+        var infoWindow = [];
+        var required = 'map';
+        if(user !== undefined) {
+            required = 'uamap';
+        }
+        // AJAX Call
+        $.ajax({
+			type       : "POST",
+			url        : PreCogURL+"/functions/frontend/extractflickrdata.php",
+			crossDomain: true,
+			beforeSend : function() { $.mobile.showPageLoadingMsg();},
+			complete   : function() { $.mobile.hidePageLoadingMsg();},
+			data       : {required : required, eventname : currentEvent},
+			dataType   : 'json',
+			success    : function(response) {
+				
+                if(response) {
+                    obj = response;
+                    var count = obj.results.length;
+                    for (var i = 0; i < count; i++) {
+                        var post = obj.results[i];
+                        var html = app.getFlickr(post);
+                        var myLatLng = new google.maps.LatLng(post.latitude, post.longitude);
+                        var marker = new google.maps.Marker({
+                          position: myLatLng,
+                          map: map,
+                          icon: image,
+                          shape: shape,
+                          title: post.description,
+                          html: html,
+                        });
+                      
+                        var infoWindow = new google.maps.InfoWindow();
+                        google.maps.event.addListener(marker, 'click', function() {
+                            infoWindow.setContent(this.html);
+                            infoWindow.open(map,this);
+                        });
+                    }    
+                }
+                
+				//$.mobile.changePage("#globe");
+			},
+			error      : function() {      
+			}
+		}); 
+        $('.useranalysismaploader').css('display', 'none');
+    },
+    
+    callMaps: function(map) {
+        app.setGooglePlusMarkers(map);
+        app.setFacebookMarkers(map);
+        app.setTwitterMarkers(map);
+        app.setYoutubeMarkers(map);
+        app.setFlickrMarkers(map);
+    },
+    
+    loadMap: function() {
+        var mapOptions = {
+          zoom: 2,
+          center: new google.maps.LatLng(13.923404, 2.812500),
+          mapTypeId: google.maps.MapTypeId.ROADMAP
+        }
+        map = new google.maps.Map(document.getElementById('map-canvas'),
+                                  mapOptions);
+        app.callMaps(map);
+    },
 	
 	getYoutube: function(youtubevideo) {
 		var timepublished = new moment.utc(youtubevideo.Uploaded_on).local();
@@ -117,9 +517,20 @@ var app = {
 		return html;
 	},
 	
+    showDatepicker: function(element, network) {
+         $("#"+element).prepend('</div>');
+        $("#"+element).prepend('<p style="padding:15px"><button class="filterbtn" onclick="app.filter(\''+network+'\');"><i class="fa fa-play"></i> Filter</button>');
+        $("#"+element).prepend('<div class="row"><div class="cell"><p style="padding:10px"><text style="text-transform:none">To</text></div><div class="cell"> <input id="to" type="text" class="datebox" /></p></div>');
+        $("#"+element).prepend('<div class="row"><div class="cell"><p style="padding:10px"><text style="text-transform:none">From</text></div><div class="cell">  <input id="from" type="text" class="datebox" /></p></div>');
+        $("#"+element).prepend('<div class="table">');
+        var picker = $( "input[type='text']");
+        picker.mobipick();
+    },
+    
 	loadYoutube: function() {
 		var PreCogURL = localStorage.getItem("PreCogURL");
 		var currentEvent = localStorage.getItem("currentEvent");
+        $("#youtube-content").html('');
 		$.ajax({
 			type       : "POST",
 			url        : PreCogURL+"/functions/frontend/extractyoutubedata.php",
@@ -164,37 +575,61 @@ var app = {
 								html += '<img class="gplusattachmentobject" src="'+gppost.objectactorimageurl.replace(/~$/, "")+'">';
 							}
 							html += '<p class="tweettext username">'+gppost.attachmentscontent.replace(/~$/, "")+'</p>';
-							if(divider === 1) {
-							html += '<a onclick="app.loadFacebookPosts(undefined,undefined,\''+gppost.actorid+'\')" data-rel="dialog" data-transition="slideup">Load user tweets\
-									</a></p>\
-									</li>'
-							}
+							if(divider) {
+							//html += '<a onclick="app.loadFacebookPosts(undefined,undefined,\''+gppost.actorid+'\')" data-rel="dialog" data-transition="slideup">Load user tweets\
+									//</a></p>\
+                                html += ' <div data-role="controlgroup" data-type="horizontal" >\
+                                            <a onclick="app.setID('+gppost.actorid+');" href="#popupGoogle" data-rel="popup" data-role="button" data-icon="arrow-r" data-iconpos="right" >Analysis</a>\
+                                          </div> ';
+                            }
+							html += '</li>';
+							
 		return html;
 	},
 	
     
-	loadGooglePlus: function() {
+	loadGooglePlus: function(fromm,too,useridorname) {
 		var PreCogURL = localStorage.getItem("PreCogURL");
 		var currentEvent = localStorage.getItem("currentEvent");
+        var postdata = {};
+        var notcomplete = false;
+        $("#google-content").html('');
+        if (fromm === undefined && too === undefined) {
+			if (useridorname === undefined) {
+                // Normal POST for google plus posts
+				postdata       =  {required : 'display', eventname : currentEvent};
+			}
+            else {
+                app.prepareUserData("googleplus",useridorname);
+                postdata       =  {required : 'uadisplay', eventname : useridorname, more: 0};
+            }
+        } else {
+            postdata       = {required : 'display', eventname : currentEvent, from: fromm, to: too}
+        }
 		$.ajax({
 			type       : "POST",
 			url        : PreCogURL+"/functions/frontend/extractgoogleplusdata.php",
 			crossDomain: true,
 			beforeSend : function() { $.mobile.showPageLoadingMsg();},
-			complete   : function() { $.mobile.hidePageLoadingMsg();},
-			data       : {required : 'display', eventname : currentEvent},
+			complete   : function() { if(!(notcomplete)) {  $.mobile.hidePageLoadingMsg(); }},
+			data       : postdata,
 			dataType   : 'json',
 			success    : function(response) {			
 				html = '<ul class="twitter-content-listview" data-role="listview" data-split-icon="search" >';
 				var jsongpdata = response; //JSON.parse(response);
-				var resultcount = jsongpdata.results.length;
-				for (var i = 0; i < resultcount; i++) {
-					html += app.getGoogle(jsongpdata.results[i]);
-				}
-				html += '</ul>	';
-				$("#google-content").html(html);
-				$.mobile.changePage("#googleplus");
-				$('.timeago').timeago();
+                if(jsongpdata && jsongpdata.results != null) {
+                    var resultcount = jsongpdata.results.length;
+                    for (var i = 0; i < resultcount; i++) {
+                        html += app.getGoogle(jsongpdata.results[i], true);
+                    }
+                    html += '</ul>	';
+                    $("#google-content").html(html);
+                    $.mobile.changePage("#googleplus");
+                    $('.timeago').timeago();
+                } else {
+                    setTimeout(function() { app.loadGooglePlus(fromm,too,useridorname); },3000);
+                    notcomplete = true;
+                }
 			},
 			error      : function() {      
 			}
@@ -202,11 +637,13 @@ var app = {
 	},
 	
     getFlickr: function(flickrphoto) {
-		return '<img width="75" height="75" border="0" style="float:left" data-thumbdata="" class="pc_img" alt="'+flickrphoto.title+'" src="http://farm'+flickrphoto.farm+'.staticflickr.com/'+flickrphoto.server+'/'+flickrphoto.photo_id+'_'+flickrphoto.secret+'_s.jpg">';
+		return '<div data-role="popup" id="popupFlickr'+flickrphoto.photo_id+'" data-overlay-theme="a" data-theme="d" data-corners="false">\
+					<a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a><img class="popphoto" src="http://farm'+flickrphoto.farm+'.staticflickr.com/'+flickrphoto.server+'/'+flickrphoto.photo_id+'_'+flickrphoto.secret+'_m.jpg" style="max-height:512px;" alt="Paris, France">\
+				</div><a href="#popupFlickr'+flickrphoto.photo_id+'" data-rel="popup" data-position-to="window" data-transition="fade" class="ui-link"><img width="75" height="75" border="0" style="float:left" data-thumbdata="" class="pc_img" alt="'+flickrphoto.title+'" src="http://farm'+flickrphoto.farm+'.staticflickr.com/'+flickrphoto.server+'/'+flickrphoto.photo_id+'_'+flickrphoto.secret+'_s.jpg"></a>';
 		html = '<div class="photo-display-item">'
         		+'<div class="thumb">'
             		+'<span class="photo_container pc_s">'
-						+'<a class="rapidnofollow" target="_blank" title="'+flickrphoto.title+'" href="http://www.flickr.com/photos/'+flickrphoto.nsid+'/'+flickrphoto.photo_id+'">'
+						+'<a href="#popupFlickr" data-rel="popup" data-position-to="window" data-transition="fade" class="ui-link">'
 							+'<img width="75" height="75" border="0" data-thumbdata="" class="pc_img" alt="'+flickrphoto.title+'" src="http://farm'+flickrphoto.farm+'.staticflickr.com/'+flickrphoto.server+'/'+flickrphoto.photo_id+'_'+flickrphoto.secret+'_s.jpg">'
 						+'</a>'
             		+'</span>'
@@ -218,6 +655,7 @@ var app = {
 	loadFlickr: function() {
 		var PreCogURL = localStorage.getItem("PreCogURL");
 		var currentEvent = localStorage.getItem("currentEvent");
+        $("#flickr-content").html('');
 		$.ajax({
 			type       : "POST",
 			url        : PreCogURL+"/functions/frontend/extractflickrdata.php",
@@ -259,16 +697,19 @@ var app = {
 							<p class="tweettext">'+post+'\</p>\
 							</a>';
 							if(divider === undefined) {
-							html += '<a onclick="app.loadFacebookPosts(undefined,undefined,\''+fbpost.from_id+'\')" data-rel="dialog" data-transition="slideup">Load user tweets\
-									</a>\
-									</li>'
-							}
+                                html += ' <div data-role="controlgroup" data-type="horizontal" >\
+                                            <a onclick="app.setID('+fbpost.from_id+');" href="#popupFacebook" data-rel="popup" data-role="button" data-icon="arrow-r" data-iconpos="right" >Analysis</a>\
+                                          </div> ';
+                            }
+									html += '</li>'
+							
 		return html;
 	},
 	
 	loadFacebookPosts: function(fromm,too,useridorname) {
 		var PreCogURL = localStorage.getItem("PreCogURL");
 		var currentEvent = localStorage.getItem("currentEvent");
+        $("#facebook-content").html('');
         postdata = {};
         if (fromm === undefined && too === undefined) {
 			if (useridorname === undefined) {
@@ -331,7 +772,7 @@ var app = {
         }   
         else {
             // Historical Facebook posts
-            postdata       = {required : 'display', eventname : currentEvent, from: fromm, to: too}
+            postdata       = {required : 'display', eventname : currentEvent, datefrom: fromm, dateto: too}
         }
 		$.ajax({
 			type       : "POST",
@@ -343,7 +784,7 @@ var app = {
 			dataType   : 'json',
 			success    : function(response) {
 				html = '<ul class="twitter-content-listview" data-role="listview" data-split-icon="search" >';
-				var jsonfbdata = response; //JSON.parse(response);
+				var jsonfbdata = response;
 				var resultcount = jsonfbdata.results.length;
 				for (var i = 0; i < resultcount; i++) {
 					html += app.getFacebook(jsonfbdata.results[i]);
@@ -362,6 +803,36 @@ var app = {
 		
 	},
 	
+    setID: function(id) {
+        localStorage.setItem("ID",id);
+    },
+      
+    refreshPage: function() {
+        hash = window.location.hash;
+        if(hash.indexOf("twitter") > 0) {
+            app.loadTweets();
+        }
+        else if (hash.indexOf("facebook") > 0) {
+            app.loadFacebookPosts();
+        }
+        else if (hash.indexOf("flickr") > 0) {
+            app.loadFlickr();
+        }
+        else if (hash.indexOf("googleplus") > 0) {
+            app.loadGooglePlus();
+        }
+        else if (hash.indexOf("youtube") > 0) {
+            app.loadYoutube();
+        }
+        else if (hash.indexOf("last24") > 0) {
+            app.loadSentiments(true);
+        }
+        else if (hash.indexOf("sentiment") > 0) {
+            app.loadSentiments();
+        }
+        return;
+    },
+    
 	getTweet: function(twittertweet,divider) {
 		var timepublished = new moment(twittertweet.tweet_created_at);
 		var timetoprint = timepublished.format("dddd, D MMMM YYYY") + ' at ' + timepublished.format('HH:mm:ss');
@@ -377,7 +848,7 @@ var app = {
 							//html += '<a onclick="app.loadTweets(undefined,undefined,\''+twittertweet.user_id+'\')"  data-role="button" >Load user tweets\
 									//</a>';
                                 html += ' <div data-role="controlgroup" data-type="horizontal" >\
-                                            <a href="#popupBasic" data-rel="popup" data-role="button" data-icon="arrow-r" data-iconpos="right" >Analysis</a>\
+                                            <a onclick="app.setID('+twittertweet.user_id+');" href="#popupBasic" data-rel="popup" data-role="button" data-icon="arrow-r" data-iconpos="right" >Analysis</a>\
                                           </div> ';
 									
 							}
@@ -389,9 +860,12 @@ var app = {
 		var PreCogURL = localStorage.getItem("PreCogURL");
 		var currentEvent = localStorage.getItem("currentEvent");
 		var tweetCount = localStorage.getItem("tweetCount");
+        
+        $("#twitter-content").html('');
 		tweetCount++;
         timeout = false;
 		localStorage.setItem("tweetCount",tweetCount);
+        historical = false;
 		postdata = {};
 		if (fromm === undefined && too === undefined) {
 			if (useridorname === undefined) {
@@ -451,7 +925,8 @@ var app = {
 			}
 		}
 		else {
-			postdata       = {required : 'display', eventname : currentEvent, from: fromm, to: too}
+			postdata       = {required : 'display', eventname : currentEvent, datefrom: fromm, dateto: too};
+            historical = true;  
 		}
 		$.ajax({
 			type       : "POST",
@@ -462,14 +937,21 @@ var app = {
 			data       : postdata,
 			dataType   : 'json',
 			success    : function(response) {
-					html = '<ul class="twitter-content-listview" data-role="listview" data-split-icon="search" >';
+                    html = '';
+                    if(historical) {
+                        html += '<p class="notice">Showing tweets from '+new XDate(fromm*1000).toString("dddd MMM d, yyyy HH:mm:ss")+' to '+new XDate(too*1000).toString("dddd MMM d, yyyy HH:mm:ss")+'</p>';
+                    }
+					html += '<ul class="twitter-content-listview" data-role="listview" data-split-icon="search" >';
 					var jsontwitterdata = response; //JSON.parse(response);
-					var resultcount = jsontwitterdata.results.length;
-					for (var i = 0; i < resultcount; i++) {
-						html += app.getTweet(jsontwitterdata.results[i]);
-					}
-					html += '</ul>	';
-					
+                    if (jsontwitterdata != null) {
+                        var resultcount = jsontwitterdata.results.length;
+                        for (var i = 0; i < resultcount; i++) {
+                            html += app.getTweet(jsontwitterdata.results[i]);
+                        }
+                    } else {
+                        html += '<li>No Tweets</li>'
+                    }
+                    html += '</ul>	';
 					$("#twitter-content").html(html);
 					$.mobile.changePage("#twitter");
 					$('.timeago').timeago();
@@ -482,6 +964,7 @@ var app = {
 	loadPositiveTweets: function() {
 		var PreCogURL = localStorage.getItem("PreCogURL");
 		var currentEvent = localStorage.getItem("currentEvent");
+        $("#twitter-content").html('');
 		$.ajax({
 			type       : "POST",
 			url        : PreCogURL+"/functions/frontend/extracttwitterdatasentiment.php",
@@ -508,9 +991,11 @@ var app = {
 		}); 
 	},
 	
+
 	loadNegativeTweets: function() {
 		var PreCogURL = localStorage.getItem("PreCogURL");
 		var currentEvent = localStorage.getItem("currentEvent");
+        $("#twitter-content").html('');
 		$.ajax({
 			type       : "POST",
 			url        : PreCogURL+"/functions/frontend/extracttwitterdatasentiment.php",
@@ -541,16 +1026,258 @@ var app = {
 		var titleElements = document.getElementsByClassName('currentEventTitle');
 		for(i = 0; i < titleElements.length; i++) {
 			currentTitleElement = titleElements[i];
-			currentTitleElement.innerText = currentEvent;
+			currentTitleElement.innerHTML = '<i class="fa fa-'+currentTitleElement.id+'"></i> '+currentEvent;
 		}
-        $("#main-panel").panel('close');
+        $("#currentEvent").html(currentEvent);
+        $.mobile.changePage("#page-home");
 	},
 	
+    prepareUserData: function(network, id) {
+        var PreCogURL = localStorage.getItem("PreCogURL");
+        postdata       = {required : 'uadisplay', eventname : id, more: 0 };
+        $.ajax({
+            type       : "POST",
+            url        : PreCogURL+"/functions/frontend/useranalysis/uacalldatascript.php",
+            crossDomain: true,
+            beforeSend : function() {$.mobile.showPageLoadingMsg();},
+            complete   : function() {},
+            data       : {network : network, useridorname : id},
+            dataType   : 'json',
+            success    : function() {},
+            error      : function() {},
+            async      : false
+        });
+    },
+    
+    
+    
+    drawUserChartSuccess: function(response,id,networkname,last24,prefix) {
+        var obj  = response;
+        userPoints = []
+        if(obj && obj.results !== null) {
+            localStorage.setItem('GraphMode','');
+            count = obj.results.length;
+            for (var i = 0; i < count; i++) {
+                if(last24) {
+                    userPoints.push([obj.results[i].hour, obj.results[i].count]);
+                } else {
+                    userPoints.push([obj.results[i].hour + ':00', obj.results[i].count]);
+                }
+            }
+            console.log(userPoints);
+            if(last24) {
+                tickOptions = {formatString:'%#c', showGridline: false};
+            }
+            else {
+                tickOptions = {formatString:'%a %b %e %H:%M', showGridline: false};
+            }
+            var axeslabel = 'Sentiment';
+            var title = 'Sentiments';
+            if (last24) {
+                axeslabel = 'Number of Posts';
+                title = 'Last 24 Hours';
+            }
+            var plot3 = $.jqplot(prefix+'chartdiv', [userPoints], 
+            { 
+              title: title, 
+              // Series options are specified as an array of objects, one object
+              // for each series.
+              cursor:{
+                        show: true,
+                        zoom:true,
+                        showTooltip:true
+                    },
+              axes:{
+                   
+                   xaxis:{
+                       labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+                       label: 'Time of Day',
+                       renderer:$.jqplot.DateAxisRenderer,
+                       tickOptions:tickOptions,
+                       autoscale: true
+
+                   },
+                   yaxis: {
+                        labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+                        label: axeslabel
+                   }
+               },
+                legend: {
+                    show: true,
+                    location: 's',     // compass direction, nw, n, ne, e, se, s, sw, w.
+                    xoffset: 12,        // pixel offset of the legend box from the x (or x2) axis.
+                    yoffset: 12,        // pixel offset of the legend box from the y (or y2) axis.
+                    placement: 'outside',
+                    renderer: $.jqplot.EnhancedLegendRenderer,
+                    rendererOptions: {
+                        numberRows: 1
+                    }
+                },
+               series:[ 
+                  {
+                    label: networkname,
+                    showLabel : true,
+                    markerOptions: { style:'circle' }
+                  }
+              ]
+            });
+            $.mobile.hidePageLoadingMsg();
+        }
+        else {
+            setTimeout(function(){ app.drawUserChart(id,networkname,last24); },3000);
+        }
+    },
+    
+    drawUserChart: function(id, networkname,last24) {
+            postdata = {userid : id, networkname : networkname};
+            
+            var PreCogURL = localStorage.getItem("PreCogURL");
+            loadurl =  PreCogURL+"/functions/frontend/uaextractsentimentdata.php"; 
+            prefix = '';
+            if(last24) {
+                loadurl = PreCogURL+"/functions/frontend/uaextractgraphdata.php"; 
+                prefix = 'last24';
+            }
+            $('#'+prefix+'chartdiv').html('');
+            $.ajax({
+                type       : "POST",
+                url        : loadurl,
+                crossDomain: true,
+                beforeSend : function() {},
+                complete   : function() {},
+                data       : postdata,
+                dataType   : 'json',
+                timeout    : 10000,
+                success    : function(response) {
+                    app.drawUserChartSuccess(response,id,networkname,last24,prefix);
+                    localStorage.setItem(prefix+"usersentiments_"+currentEvent,JSON.stringify(response));
+			    },
+                error      : function() {
+                    response = localStorage.getItem(prefix+"usersentiments_"+currentEvent);
+                    if(response.length > 0) {
+                        app.drawUserChartSuccess(JSON.parse(response),last24,prefix);
+                    }
+                },
+                async      : false
+            });
+    },
+    
+    
+    loadSentimentsSucess: function(response, last24, prefix) {
+        var obj  = response;
+                
+        if(obj && obj.results !== null) {
+            
+            var count = obj.results.GooglePlus.length;
+            var post_array = [];
+            var post_count = [];
+
+            var gplusPoints = [];
+            var fbPoints = [];
+            var twitterPoints = [];
+            var youtubePoints = [];
+            var flickrPoints = [];
+            var endvalue = 0;
+            for (var i = 0; i < count; i++) {
+                if(oncethrough == 0) {
+                    minimum = obj.results.GooglePlus[i].hour;
+                    oncethrough++;
+                }
+                gplusPoints.push([obj.results.GooglePlus[i].hour + ':00', obj.results.GooglePlus[i].count]);
+                fbPoints.push([obj.results.Facebook[i].hour + ':00', obj.results.Facebook[i].count]);
+                twitterPoints.push([obj.results.Twitter[i].hour + ':00', obj.results.Twitter[i].count]);
+                youtubePoints.push([obj.results.Youtube[i].hour + ':00', obj.results.Youtube[i].count]);
+                flickrPoints.push([obj.results.Flickr[i].hour + ':00', obj.results.Flickr[i].count]);
+            }
+            
+              var axeslabel = 'Sentiment';
+              var title = 'Sentiments';
+              if (last24) {
+                axeslabel = 'Number of Posts';
+                title = 'Last 24 hours';
+              }
+              var plot3 = $.jqplot(prefix+'chartdiv', [gplusPoints, fbPoints, twitterPoints, youtubePoints, flickrPoints], 
+                { 
+                  title: title, 
+                  // Series options are specified as an array of objects, one object
+                  // for each series.
+                  cursor:{
+                            show: true,
+                            zoom:true,
+                            showTooltip:true
+                        },
+                  axes:{
+                       
+                       xaxis:{
+                           labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+                           label: 'Time of Day',
+                           renderer:$.jqplot.DateAxisRenderer,
+                           //min: minimum+':00',
+                           
+                           tickOptions:{formatString:'%R', showGridline: false},
+                           tickInterval:'4 hours',
+                           autoscale: true
+
+                       },
+                       yaxis: {
+                            labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+                            label: axeslabel
+                       }
+                   },
+                    legend: {
+                        show: true,
+                        location: 's',     // compass direction, nw, n, ne, e, se, s, sw, w.
+                        xoffset: 12,        // pixel offset of the legend box from the x (or x2) axis.
+                        yoffset: 12,        // pixel offset of the legend box from the y (or y2) axis.
+                        placement: 'outside',
+                        renderer: $.jqplot.EnhancedLegendRenderer,
+                        rendererOptions: {
+                            numberRows: 1
+                        }
+                    },
+                   series:[ 
+                      {
+                        label: "Google+",
+                        showLabel : true,
+                        markerOptions: { style:'circle' }
+                      }, 
+                      {
+                        label: "Facebook",
+                        showLabel : true,
+                        markerOptions: { style:"circle" }
+                      },
+                      { 
+                        label: "Twitter",
+                        showLabel : true,
+                        markerOptions: { style:"circle" }
+                      }, 
+                      {
+                        label: "Youtube",
+                        showLabel : true,
+                        markerOptions: { style:"circle" }
+                      },
+                      {
+                        label: "Flickr",
+                        showLabel : true,
+                        markerOptions: { style:"circle" }
+                      }
+                  ]
+                });
+        }
+        if(last24) {
+            $.mobile.changePage("#last24");
+        } else {
+            $.mobile.changePage("#sentiment");
+        }
+    },
+    
 	loadSentiments: function(last24) {
 		oncethrough = 0;
 		var PreCogURL = localStorage.getItem("PreCogURL");
 		var currentEvent = localStorage.getItem("currentEvent");
 
+        postdata = {eventname : currentEvent};
+        
         var prefix = '';
         loadurl =  PreCogURL+"/functions/frontend/sentiment/extractsentimentdata.php";
         if(last24) {
@@ -558,150 +1285,74 @@ var app = {
             loadurl = PreCogURL+"/functions/frontend/extractgraphdata.php";
         }
         $('#'+prefix+'chartdiv').html('');
+        
+        var graphMode = localStorage.getItem('GraphMode');
+        
+        if(graphMode != "") {
+            var ID = localStorage.getItem("ID");
+            app.prepareUserData(graphMode, ID);
+            app.drawUserChart(ID,graphMode,last24);
+            return;
+        }
+        
 		$.ajax({
 			type       : "POST",
 			url        : loadurl,
 			crossDomain: true,
-			beforeSend : function() { $.mobile.showPageLoadingMsg();},
-			complete   : function() { $.mobile.hidePageLoadingMsg();},
-			data       : {eventname : currentEvent},
+			beforeSend : function() { $.mobile.showPageLoadingMsg(); },
+			complete   : function() { $.mobile.hidePageLoadingMsg(); },
+			data       : postdata,
 			dataType   : 'json',
+            timeout    : 10000,
 			success    : function(response) {
-				var obj  = response; 
-				if(obj && obj.results !== null) {
-					var count = obj.results.GooglePlus.length;
-					var post_array = [];
-					var post_count = [];
-
-					post_array[0] = [];
-					post_array[0][0] = 'Hour';
-					post_array[0][1] = 'G+';
-					post_array[0][2] = 'FB';
-					post_array[0][3] = 'Twitter';
-					post_array[0][4] = 'YouTube';
-					post_array[0][5] = 'Flickr';
-					var gplusPoints = [];
-					var fbPoints = [];
-					var twitterPoints = [];
-					var youtubePoints = [];
-					var flickrPoints = [];
-					var endvalue = 0;
-					for (var i = 0; i < count; i++) {
-                        if(oncethrough == 0) {
-                            minimum = obj.results.GooglePlus[i].hour;
-                            oncethrough++;
-                        }
-						gplusPoints.push([obj.results.GooglePlus[i].hour + ':00', obj.results.GooglePlus[i].count]);
-						fbPoints.push([obj.results.Facebook[i].hour + ':00', obj.results.Facebook[i].count]);
-						twitterPoints.push([obj.results.Twitter[i].hour + ':00', obj.results.Twitter[i].count]);
-						youtubePoints.push([obj.results.Youtube[i].hour + ':00', obj.results.Youtube[i].count]);
-						flickrPoints.push([obj.results.Flickr[i].hour + ':00', obj.results.Flickr[i].count]);
-					}
-					
-                    console.log(gplusPoints);
-					  var plot3 = $.jqplot(prefix+'chartdiv', [gplusPoints, fbPoints, twitterPoints, youtubePoints, flickrPoints], 
-						{ 
-						  title:'Sentiments', 
-						  // Series options are specified as an array of objects, one object
-						  // for each series.
-						  cursor:{
-                                    show: true,
-                                    zoom:true,
-                                    showTooltip:true
-                                },
-                          axes:{
-                               
-                               xaxis:{
-                                   labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
-                                   label: 'Time of Day',
-                                   renderer:$.jqplot.DateAxisRenderer,
-                                   //min: minimum+':00',
-                                   
-                                   tickOptions:{formatString:'%R', showGridline: false},
-                                   tickInterval:'4 hours',
-                                   autoscale: true
-
-                               },
-                               yaxis: {
-                                    labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
-                                    label: 'Sentiment'
-                               }
-                           },
-						    legend: {
-								show: true,
-								location: 's',     // compass direction, nw, n, ne, e, se, s, sw, w.
-								xoffset: 12,        // pixel offset of the legend box from the x (or x2) axis.
-								yoffset: 12,        // pixel offset of the legend box from the y (or y2) axis.
-                                placement: 'outside',
-                                renderer: $.jqplot.EnhancedLegendRenderer,
-                                rendererOptions: {
-                                    numberRows: 1
-                                }
-							},
-						   series:[ 
-							  {
-								label: "Google+",
-								showLabel : true,
-								markerOptions: { style:'circle' }
-							  }, 
-							  {
-								label: "Facebook",
-								showLabel : true,
-								markerOptions: { style:"circle" }
-							  },
-							  { 
-								label: "Twitter",
-								showLabel : true,
-								markerOptions: { style:"circle" }
-							  }, 
-							  {
-								label: "Youtube",
-								showLabel : true,
-								markerOptions: { style:"circle" }
-							  },
-							  {
-								label: "Flickr",
-								showLabel : true,
-								markerOptions: { style:"circle" }
-							  }
-						  ]
-						});
-				}
-				if(last24) {
-				    $.mobile.changePage("#last24");
-                } else {
-                    $.mobile.changePage("#sentiment");
-                }
+				app.loadSentimentsSucess(response,last24,prefix);
+                localStorage.setItem(prefix+"sentiments_"+currentEvent,JSON.stringify(response));
 			},
-			error      : function() {}
+			error      : function() {
+                response = localStorage.getItem(prefix+"sentiments_"+currentEvent);
+                if(response.length > 0) {
+                    app.loadSentimentsSucess(JSON.parse(response),last24,prefix);
+                }
+            }
 		}); 
 	},
+    
+    geteventnamesSuccess: function(response) {
+        var jsondata = response; 
+        var html = '<ul data-filter="true" data-role="listview" id="main-panel-listview">';
+        $.each(jsondata, function(i, v) {
+            html += '<li class="clickable eventlistItems" onclick="app.changeevent(\''+v.eventname+'\')">'+v.eventname+'</li>';
+        });
+        html += '</ul>';
+        $("#eventsPage-content").html(html);
+        $("#currentEvent").html(currentEvent);
+        $.mobile.changePage("#eventsPage");
+    },
 	
 	geteventnames: function() {
 		var PreCogURL = localStorage.getItem("PreCogURL");
-		var tweetCount = localStorage.getItem("tweetCount");
-		tweetCount = 0;
-		localStorage.setItem("tweetCount",tweetCount);
+        var currentEvent = localStorage.getItem("currentEvent");
+        // PreCogURL = 'http://127.0.0.1/timeout.php';
+
 		$.ajax({
 			type       : "POST",
 			url        : PreCogURL+"/functions/frontend/stats.php",
+            // url         : PreCogURL,
 			crossDomain: true,
 			beforeSend : function() { $.mobile.showPageLoadingMsg();},
 			complete   : function() { $.mobile.hidePageLoadingMsg();},
 			data       : {functionname : 'geteventnames'},
 			dataType   : 'json',
+            timeout    : 10000, // 10 second timeout
 			success    : function(response) {
-				var jsondata = response; 
-				var html = '<ul data-filter="true" data-role="listview" id="main-panel-listview">';
-				$.each(jsondata, function(i, v) {
-					html += '<li class="clickable eventlistItems" onclick="app.changeevent(\''+v.eventname+'\')">'+v.eventname+'</li>';
-				});
-				html += '</ul>';
-				$('#main-panel').html(html);
-				$('#main-panel-listview').trigger('updatelayout');
-				$("#main-panel-listview").listview().listview("refresh");
+                app.geteventnamesSuccess(response);
+                localStorage.setItem("eventnames",JSON.stringify(response));
 			},
-			error      : function() {      
+			error      : function() { 
+                response = localStorage.getItem("eventnames");
+                if(response.length > 0) {
+                    app.geteventnamesSuccess(JSON.parse(response));
+                }
 			}
 		}); 
 	}

@@ -288,3 +288,18 @@ li.clickable {
     text-transform: none;
     background-color:#dff0d8;
 }
+
+.ui-popup > ul > li {
+    overflow:auto;
+    border:0;
+    background:0;
+    background-color:0;
+    background-image:url('ANYNONEXISTINGIMAGE') !important;
+    text-transform:none;
+}
+
+.tweetimgs {
+    border-radius:5px;
+    margin-right:5px;
+    height:100%;
+}

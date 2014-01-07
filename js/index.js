@@ -40,6 +40,15 @@ var app = {
     // Bind any events that are required on startup. Common events are:
     // 'load', 'deviceready', 'offline', and 'online'.
     bindEvents: function() {
+        
+        $('#twitter').live("swipeleft", function(){
+            $("#twitter-panel-right").panel('open');
+        });
+        
+        $('#twitter').live("swiperight", function(){
+            $("#twitter-panel-right").panel('close');
+        });
+        
         document.addEventListener('deviceready', this.onDeviceReady, false);
 		$( document ).bind( 'mobileinit', function(){
 			$.mobile.loader.prototype.options.text = "loading";

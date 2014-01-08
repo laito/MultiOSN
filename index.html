@@ -155,7 +155,7 @@
                   <a href="#" onclick="app.refreshPage();" data-role="button"><i class="fa fa-refresh"></i></a>
                   <a href="#twitter-panel-right" data-rel="open" data-role="button" data-icon="setings">Options</a>
                 </div>
-			</div>
+			</div> 
             <!-- Popup -->
             <div data-role="popup" id="popupBasic" data-theme="a" class="ui-popup ui-body-a ui-overlay-shadow ui-corner-all">
 				<ul data-role="listview" data-inset="true" style="min-width:210px;" data-theme="b" class="ui-listview ui-listview-inset ui-corner-all ui-shadow ui-group-theme-b">
@@ -170,6 +170,11 @@
 			<!-- Content -->
 			<div id="twitter-content" data-role="content">
 			</div>
+            
+            <!-- Footer -->
+			<div data-role="footer" class="footer"> 
+                <a data-role="button" class="loadmore" id="twitterloader" onclick="app.loadMore('twitter');">Load More</a>
+            </div>
 		</div>
 		
         

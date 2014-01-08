@@ -58,10 +58,14 @@ var app = {
 		});
         
 		$(document).bind('pagechange', function() {
-			  $('.ui-page-active .ui-listview').listview('refresh');
-			  $('.ui-page-active :jqmData(role=content)').trigger('create');
+            //alert('pagechange');
+			$('.ui-page-active .ui-listview').listview('refresh');
+			$('.ui-page-active :jqmData(role=content)').trigger('create');
 		});
         
+        $(document).bind('pageshow', function() {
+            localStorage.setItem("page",0);
+        });
         
         $("#globe").on('pageshow', function() {
 			app.loadMap();
@@ -131,6 +135,15 @@ var app = {
 
 	htmlencode: function(value) {
         return $('<div/>').text(value).html();
+    },
+    
+    loadMore:   function(network) {
+        var page = localStorage.getItem("page");
+        if(page === null || page <= 0) {
+            page = 1;
+        }
+        localStorage.setItem("page",parseInt(page)+1);
+        app.loadTweets(undefined,undefined,undefined,page);
     },
     
     loadTagCloud: function(user) {
@@ -865,12 +878,20 @@ var app = {
 		return html;
 	},
 	
-	loadTweets: function(fromm,too,useridorname) {
+	loadTweets: function(fromm,too,useridorname,page) {
+        
 		var PreCogURL = localStorage.getItem("PreCogURL");
 		var currentEvent = localStorage.getItem("currentEvent");
 		var tweetCount = localStorage.getItem("tweetCount");
         
-        $("#twitter-content").html('');
+        if(page === undefined) {
+            more = 0;
+        } else {
+            more = page;
+        }
+        if (more <= 0) {
+            $("#twitter-content").html('');
+        }
 		tweetCount++;
         timeout = false;
 		localStorage.setItem("tweetCount",tweetCount);
@@ -878,10 +899,10 @@ var app = {
 		postdata = {};
 		if (fromm === undefined && too === undefined) {
 			if (useridorname === undefined) {
-				postdata       = {required : 'display', eventname : currentEvent}
+				postdata       = {required : 'display', eventname : currentEvent, more: more}
 			}
 			else {
-						postdata       = {required : 'uadisplay', eventname : useridorname, more: 0 }
+						postdata       = {required : 'uadisplay', eventname : useridorname, more: more }
 						$.ajax({
 							type       : "POST",
 							url        : PreCogURL+"/functions/frontend/useranalysis/uacalldatascript.php",
@@ -905,17 +926,27 @@ var app = {
 										}
 										else {
                                             $.mobile.hidePageLoadingMsg();
-											html = '<ul class="twitter-content-listview" data-role="listview">';
+                                            
+                                            if(more <= 0) {
+								                html = '<ul class="twitter-content-listview" data-role="listview">';
+                                            } else {
+                                                html = $(".twitter-content-listview").html();
+                                            }
+                                            
 											var jsontwitterdata = response;
                                             
 											var resultcount = jsontwitterdata.results.length;
 											for (var i = 0; i < resultcount; i++) {
-												
 												html += app.getTweet(jsontwitterdata.results[i],true);
 											}
-											html += '</ul>	';
-											
-											$("#twitter-content").html(html);
+                                            if(more <= 0) {
+											 html += '</ul>	';
+                                            }
+											if(more <= 0) {
+								                $("#twitter-content").html(html);
+                                            } else {
+                                                $(".twitter-content-listview").html(html);
+                                            }
 											$.mobile.changePage("#twitter");
 											$('.timeago').timeago();
 										}
@@ -934,7 +965,7 @@ var app = {
 			}
 		}
 		else {
-			postdata       = {required : 'display', eventname : currentEvent, datefrom: fromm, dateto: too};
+			postdata       = {required : 'display', eventname : currentEvent, datefrom: fromm, dateto: too, more: more};
             historical = true;  
 		}
 		$.ajax({
@@ -947,10 +978,16 @@ var app = {
 			dataType   : 'json',
 			success    : function(response) {
                     html = '';
+                
                     if(historical) {
                         html += '<p class="notice">Showing tweets from '+new XDate(fromm*1000).toString("dddd MMM d, yyyy HH:mm:ss")+' to '+new XDate(too*1000).toString("dddd MMM d, yyyy HH:mm:ss")+'</p>';
                     }
-					html += '<ul class="twitter-content-listview" data-role="listview" data-split-icon="search" >';
+					html += '<ul class="twitter-content-listview" data-role="listview" data-split-icon="search">';
+                    if(more <= 0) {
+                        html = '<ul class="twitter-content-listview" data-role="listview"  data-split-icon="search">';
+                    } else {
+                        html = $(".twitter-content-listview").html();
+                    }
 					var jsontwitterdata = response; //JSON.parse(response);
                     if (jsontwitterdata != null) {
                         var resultcount = jsontwitterdata.results.length;
@@ -961,7 +998,11 @@ var app = {
                         html += '<li>No Tweets</li>'
                     }
                     html += '</ul>	';
-					$("#twitter-content").html(html);
+                    if(more <= 0) {
+					   $("#twitter-content").html(html);
+                    } else {
+                       $(".twitter-content-listview").html(html);
+                    }
 					$.mobile.changePage("#twitter");
 					$('.timeago').timeago();
 			},

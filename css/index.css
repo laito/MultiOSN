@@ -303,3 +303,12 @@ li.clickable {
     margin-right:5px;
     height:100%;
 }
+
+.loadmore {
+    width:100%;
+}
+
+.footer {
+    background:0;
+    border:0;
+}

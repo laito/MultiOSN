@@ -116,7 +116,7 @@
 			<!-- Header -->
 			<div data-role="header" data-position="fixed" data-tap-toggle="false"> 
 				<a href="index.html" data-role="button" class="ui-btn-left" data-transition="slidedown"><i class="fa fa-arrow-left"></i></a>
-				<h3 class="currentEventTitle" id="tagcloud"></h3>
+				<h3 id="tagcloudTitle"></h3>
                 <div class="ui-btn-right" data-role="controlgroup" data-type="horizontal">
                   <a href="#" onclick="app.refreshPage();" data-role="button"><i class="fa fa-refresh"></i></a>
                 </div>
@@ -232,6 +232,7 @@
 			<!-- Panel -->
 			<div data-role="panel" id="flickr-panel-right" data-position="right">
 				<ul data-role="listview">
+                    <li class="rightItems"><a onclick="app.showDatepicker('flickr-content', 'flickr');" href="#">Historical</a></li>
                     <li class="rightItems"><a onclick="localStorage.setItem('TagCloud','flickr');" href="#tagcloud">Tag Cloud</a></li>
 				</ul>
 			</div>
@@ -255,6 +256,7 @@
 			<!-- Panel -->
 			<div data-role="panel" id="google-panel-right" data-position="right">
 				<ul data-role="listview">
+                    <li class="rightItems"><a onclick="app.showDatepicker('google-content', 'google');" href="#">Historical</a></li>
                     <li class="rightItems"><a onclick="localStorage.setItem('TagCloud','googleplus');" href="#tagcloud">Tag Cloud</a></li>
 				</ul>
 			</div>
@@ -288,6 +290,7 @@
 			<!-- Panel -->
 			<div data-role="panel" id="youtube-panel-right" data-position="right">
 				<ul data-role="listview">
+                    <li class="rightItems"><a onclick="app.showDatepicker('youtube-content', 'youtube');" href="#">Historical</a></li>
                     <li class="rightItems"><a onclick="localStorage.setItem('TagCloud','youtube');" href="#tagcloud">Tag Cloud</a></li>
 				</ul>
 			</div>

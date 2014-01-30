@@ -157,6 +157,8 @@ var app = {
             url = '/functions/frontend/tagcloudscripts/gettagcloud.php';
             postdata = {eventname: currentEvent, osn: osn};
         }
+        tagCLoudTitle = document.getElementById("tagcloudTitle");
+        tagCLoudTitle.innerHTML = "<i class='fa fa-"+osn.toLowerCase()+"'> "+osn;
         $.ajax({
 			type       : "POST",
 			url        : PreCogURL+url,
@@ -445,6 +447,15 @@ var app = {
         else if(network === 'facebook') {
             app.loadFacebookPosts(from,to);
         }
+        else if(network === 'flickr') {
+            app.loadFlickr(from,to);
+        }
+        else if(network === 'google') {
+            app.loadGooglePlus(from,to);
+        }
+        else if(network === 'youtube') {
+            app.loadYoutube(from,to);
+        }
     },
     
     setFlickrMarkers: function(map, user) {
@@ -549,26 +560,35 @@ var app = {
         picker.mobipick();
     },
     
-	loadYoutube: function() {
+	loadYoutube: function(fromm, too) {
 		var PreCogURL = localStorage.getItem("PreCogURL");
 		var currentEvent = localStorage.getItem("currentEvent");
         $("#youtube-content").html('');
+        if(fromm === undefined && too === undefined) {
+            postdata = {required : 'display', eventname : currentEvent};
+        } else {
+            postdata = {required : 'display', eventname : currentEvent, datefrom: fromm, dateto: too}
+        }
 		$.ajax({
 			type       : "POST",
 			url        : PreCogURL+"/functions/frontend/extractyoutubedata.php",
 			crossDomain: true,
 			beforeSend : function() { $.mobile.showPageLoadingMsg();},
 			complete   : function() { $.mobile.hidePageLoadingMsg();},
-			data       : {required : 'display', eventname : currentEvent},
+			data       : postdata,
 			dataType   : 'json',
 			success    : function(response) {
 				html = '<ul class="twitter-content-listview" data-role="listview" data-split-icon="search" >';
 				var jsonyoutubedata = response; //JSON.parse(response);
-				var resultcount = jsonyoutubedata.results.length;
-				for (var i = 0; i < resultcount; i++) {
-					html += app.getYoutube(jsonyoutubedata.results[i]);
-				}
-				html += '</ul>	';
+                if(response != null) {
+                    var resultcount = jsonyoutubedata.results.length;
+                    for (var i = 0; i < resultcount; i++) {
+                        html += app.getYoutube(jsonyoutubedata.results[i]);
+                    }
+                    html += '</ul>	';
+                } else {
+                        html += '<li>No Videos</li>'
+                }
 				$("#youtube-content").html(html);
 				$.mobile.changePage("#youtube");
 				$('.timeago').timeago();
@@ -636,7 +656,8 @@ var app = {
 			complete   : function() { if(!(notcomplete)) {  $.mobile.hidePageLoadingMsg(); }},
 			data       : postdata,
 			dataType   : 'json',
-			success    : function(response) {			
+			success    : function(response) {	
+                
 				html = '<ul class="twitter-content-listview" data-role="listview" data-split-icon="search" >';
 				var jsongpdata = response; //JSON.parse(response);
                 if(jsongpdata && jsongpdata.results != null) {
@@ -674,25 +695,35 @@ var app = {
 		return html;
 	},
     
-	loadFlickr: function() {
+	loadFlickr: function(fromm,too) {
 		var PreCogURL = localStorage.getItem("PreCogURL");
 		var currentEvent = localStorage.getItem("currentEvent");
         $("#flickr-content").html('');
+        postdata = {required : 'display', eventname : currentEvent};
+        if(fromm === undefined && too === undefined) {
+            postdata = {required : 'display', eventname : currentEvent};
+        } else {
+            postdata = {required : 'display', eventname : currentEvent, datefrom: fromm, dateto: too}
+        }
 		$.ajax({
 			type       : "POST",
 			url        : PreCogURL+"/functions/frontend/extractflickrdata.php",
 			crossDomain: true,
 			beforeSend : function() { $.mobile.showPageLoadingMsg();},
 			complete   : function() { $.mobile.hidePageLoadingMsg();},
-			data       : {required : 'display', eventname : currentEvent},
+			data       : postdata,
 			dataType   : 'json',
 			success    : function(response) {
 				html  = '';
 				var jsonflickrdata = response;
-				var resultcount = jsonflickrdata.results.length;
-				for (var i = 0; i < resultcount; i++) {
-					html += app.getFlickr(jsonflickrdata.results[i]);
-				}
+                if(jsonflickrdata != null) {
+                    var resultcount = jsonflickrdata.results.length;
+                    for (var i = 0; i < resultcount; i++) {
+                        html += app.getFlickr(jsonflickrdata.results[i]);
+                    }
+                } else {
+                    html = '<li>No Results</li>';
+                }
 				$("#flickr-content").html(html);
 				$.mobile.navigate("#flickr");
 				$('.timeago').timeago();
@@ -1343,9 +1374,9 @@ var app = {
             app.prepareUserData(graphMode, ID);
             app.drawUserChart(ID,graphMode,last24);
             if(last24) {
-                sentyTitle = document.getElementById("#sentimentTitle");
+                sentyTitle = document.getElementById("sentimentTitle");
             } else {
-                sentyTitle = document.getElementById("#last24Title");
+                sentyTitle = document.getElementById("last24Title");
             }
             sentyTitle.innerHTML = "<i class='fa fa-"+graphMode.toLowerCase()+"'> "+graphMode;
             return;

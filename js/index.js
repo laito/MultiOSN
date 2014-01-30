@@ -1342,6 +1342,12 @@ var app = {
             var ID = localStorage.getItem("ID");
             app.prepareUserData(graphMode, ID);
             app.drawUserChart(ID,graphMode,last24);
+            if(last24) {
+                sentyTitle = document.getElementById("#sentimentTitle");
+            } else {
+                sentyTitle = document.getElementById("#last24Title");
+            }
+            sentyTitle.innerHTML = "<i class='fa fa-"+graphMode.toLowerCase()+"'> "+graphMode;
             return;
         }
         

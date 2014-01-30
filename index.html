@@ -40,15 +40,15 @@
 			<div id="home-content" data-role="content">
                 <h1 class="ui-title title" tabindex="0" role="heading" aria-level="1" style="font-size:30pt;font-family:'Arvo';margin:20px;"><text style="color:#323030">multi</text><text style="color:#107710">osn</text></h1>
 				<ul data-role="listview" class="homeList">
-                    <li class="homeItems topcurved"><a href="#globe" data-transition="slideup"><i class="fa fa-globe"></i> Around the Globe</a></li>
-					<li class="homeItems"><a onclick="localStorage.setItem('GraphMode','');" href="#sentiment" data-transition="slideup"><i class="fa fa-bar-chart-o"></i> Sentiments</a></li>
-                    <li class="homeItems"><a onclick="localStorage.setItem('GraphMode','');" href="#last24" data-transition="slideup"><i class="fa fa-bar-chart-o"></i> Last 24 Hours</a></li>
-                    <li class="homeItems"><a onclick="localStorage.setItem('TagCloud','all');" href="#tagcloud" data-transition="slideup"><i class="fa fa-cloud"></i> Tag Clouds</a></li>
-					<li class="homeItems"><a href="#twitter" data-transition="slideup"><i class="fa fa-twitter"></i> Tweets</a></li>
-					<li class="homeItems"><a href="#facebook" data-transition="slideup"><i class="fa fa-facebook"></i> Facebook Feed</a></li>
-					<li class="homeItems"><a href="#flickr" data-transition="slideup"><i class="fa fa-flickr"></i> Flickr</a></li>
-					<li class="homeItems"><a href="#googleplus" data-transition="slideup"><i class="fa fa-google-plus"></i> Google+</a></li>
-					<li class="homeItems bottomcurved"><a href="#youtube" data-transition="slideup"><i class="fa fa-youtube"></i> Youtube</a></li>
+                    <li class="homeItems topcurved"><a class="homeItemsLink" href="#globe" data-transition="slideup"><img class="icon" src="img/Globe.png"> Around the Globe</a></li>
+					<li class="homeItems"><a class="homeItemsLink"  onclick="localStorage.setItem('GraphMode','');" href="#sentiment" data-transition="slideup"><img width="30" height="30" class="icon" src="img/charts.png"> Sentiments</a></li>
+                    <li class="homeItems"><a class="homeItemsLink"  onclick="localStorage.setItem('GraphMode','');" href="#last24" data-transition="slideup"><img width="30" height="30" class="icon" src="img/charts.png"> Last 24 Hours</a></li>
+                    <li class="homeItems"><a class="homeItemsLink" onclick="localStorage.setItem('TagCloud','all');" href="#tagcloud" data-transition="slideup"><img width="30" height="30" class="icon" src="img/Cloud.png"> Tag Clouds</a></li>
+					<li class="homeItems"><a class="homeItemsLink"  href="#twitter" data-transition="slideup"><img width="30" height="30" class="icon" src="img/Twitter.png">  Twitter</a></li>
+					<li class="homeItems"><a class="homeItemsLink" href="#facebook" data-transition="slideup"><img width="30" height="30" class="icon" src="img/Facebook.png"> Facebook</a></li>
+					<li class="homeItems"><a class="homeItemsLink"  href="#flickr" data-transition="slideup"><img width="30" height="30" class="icon" src="img/Flickr.png">  Flickr</a></li>
+					<li class="homeItems"><a class="homeItemsLink"  href="#googleplus" data-transition="slideup"><img width="30" height="30" class="icon" src="img/Google.png">  Google+</a></li>
+					<li class="homeItems bottomcurved"><a class="homeItemsLink"  href="#youtube" data-transition="slideup"><img width="30" height="30" class="icon" src="img/YouTube.png">  Youtube</a></li>
 				</ul>
                 <ul data-role="listview" class="homeList" style="width:100%">
                     <li class="homeItems topcurved bottomcurved" data-icon="false"><a href="#eventsPage" data-transition="slideup">Currenty Showing: <span id="currentEvent">Mumbai</span> <i class="fa fa-cog"></i></a></li>
@@ -58,10 +58,22 @@
         
         <!-- Globe Page -->
         <div data-role="page" id="globe" data-theme="c">
+            <!-- Popup -->
+            <div data-role="popup" id="popupLegend">
+                 <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+                <ul class="popuplist">
+                    <li><img src="img/googleplusmarker.png">Google+</li>
+                    <li><img src="img/facebookmarker.png">Facebook</li>
+                    <li><img src="img/twittermarker.png">Twitter</li>
+                    <li><img src="img/youtubemarker.png">Youtube</li>
+                    <li><img src="img/flickrmarker.png">Flickr</li>
+                </ul>
+            </div>
 			<!-- Header -->
 			<div data-role="header" data-position="fixed" data-tap-toggle="false"> 
 				<a href="index.html" data-role="button" class="ui-btn-left" data-transition="slidedown"><i class="fa fa-arrow-left"></i></a>
-				<h3 class="currentEventTitle"></h3>
+				<h3 class="currentEventTitle" id="#globeTitle"></h3>
+                <a href="#popupLegend" data-rel="popup" data-position-to="window">Legend</a>
 			</div>
 			<!-- Content -->
             <div id="map-canvas"  style="position:absolute; width:100%; height:100%;" data-role="content">
@@ -74,7 +86,7 @@
 			<!-- Header -->
 			<div data-role="header" data-position="fixed" data-tap-toggle="false"> 
 				<a href="index.html" data-role="button" class="ui-btn-left" data-transition="slidedown"><i class="fa fa-arrow-left"></i></a>
-				<h3 class="currentEventTitle"></h3>
+				<h3 class="currentEventTitle" id="#eventsTitle"></h3>
 			</div>
 			<!-- Content -->
 			<div id="eventsPage-content"  data-role="content">
@@ -88,7 +100,7 @@
 			<!-- Header -->
 			<div data-role="header" data-position="fixed" data-tap-toggle="false"> 
 				<a href="index.html" data-role="button" class="ui-btn-left" data-transition="slidedown"><i class="fa fa-arrow-left"></i></a>
-				<h3 class="currentEventTitle" ></h3>
+				<h3 id="#sentimentTitle"></h3>
                 <div class="ui-btn-right" data-role="controlgroup" data-type="horizontal">
                   <a href="#" onclick="app.refreshPage();" data-role="button"><i class="fa fa-refresh"></i></a>
                 </div>
@@ -122,7 +134,7 @@
 			<!-- Header -->
 			<div data-role="header" data-position="fixed" data-tap-toggle="false"> 
 				<a href="index.html" data-role="button" class="ui-btn-left" data-transition="slidedown"><i class="fa fa-arrow-left"></i></a>
-				<h3 class="currentEventTitle"></h3>
+				<h3 id="last24Title"></h3>
                 <div class="ui-btn-right" data-role="controlgroup" data-type="horizontal">
                   <a href="#" onclick="app.refreshPage();" data-role="button"><i class="fa fa-refresh"></i></a>
                 </div>

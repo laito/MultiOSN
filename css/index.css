@@ -270,6 +270,27 @@ li.clickable {
 .row {
     display: table-row;
 }
+
+.popuplist {
+    padding:5px;   
+}
+
+.popuplist img {
+    padding-right:5px;
+}
+
+.icon {
+    width:30px;
+    height:30px;
+    margin:0 auto;
+    padding:5px;
+}
+
+.homeItemsLink {
+    padding-left:50px !important;
+    min-height:0 !important;
+}
+
 .cell {
     display: table-cell;
 }

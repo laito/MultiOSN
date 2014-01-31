@@ -1396,12 +1396,22 @@ var app = {
             app.prepareUserData(graphMode, ID);
             app.drawUserChart(ID,graphMode,last24);
             if(last24) {
-                sentyTitle = document.getElementById("sentimentTitle");
-            } else {
                 sentyTitle = document.getElementById("last24Title");
+            } else {
+                sentyTitle = document.getElementById("#sentimentTitle");
             }
             sentyTitle.innerHTML = "<i class='fa fa-"+graphMode.toLowerCase()+"'> "+graphMode;
             return;
+        }
+        else {
+            if(last24) {
+                sentyTitle = document.getElementById("last24Title");
+                sentyTitle.innerHTML = "Last 24 hours - "+currentEvent;
+            } else {
+                        
+                sentyTitle = document.getElementById("#sentimentTitle");
+                sentyTitle.innerHTML = "Sentiments - "+currentEvent;
+            }
         }
         
 		$.ajax({

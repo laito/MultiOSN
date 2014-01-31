@@ -1207,10 +1207,11 @@ var app = {
                },
                 legend: {
                     show: true,
+                    fontSize: '12pt',
                     location: 's',     // compass direction, nw, n, ne, e, se, s, sw, w.
                     xoffset: 12,        // pixel offset of the legend box from the x (or x2) axis.
                     yoffset: 12,        // pixel offset of the legend box from the y (or y2) axis.
-                    placement: 'outside',
+                    placement: 'outsideGrid',
                     renderer: $.jqplot.EnhancedLegendRenderer,
                     rendererOptions: {
                         numberRows: 1
@@ -1331,9 +1332,9 @@ var app = {
                         show: true,
                         fontSize: '12pt',
                         location: 's',     // compass direction, nw, n, ne, e, se, s, sw, w.
-                        xoffset: 600,        // pixel offset of the legend box from the x (or x2) axis.
-                        yoffset: 55,        // pixel offset of the legend box from the y (or y2) axis.
-                        placement: 'outside',
+                        xoffset: 12,        // pixel offset of the legend box from the x (or x2) axis.
+                        yoffset: 12,        // pixel offset of the legend box from the y (or y2) axis.
+                        placement: 'outsideGrid',
                         renderer: $.jqplot.EnhancedLegendRenderer,
                         rendererOptions: {
                             numberRows: 1

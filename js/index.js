@@ -564,10 +564,12 @@ var app = {
 		var PreCogURL = localStorage.getItem("PreCogURL");
 		var currentEvent = localStorage.getItem("currentEvent");
         $("#youtube-content").html('');
+        historical = false;
         if(fromm === undefined && too === undefined) {
             postdata = {required : 'display', eventname : currentEvent};
         } else {
-            postdata = {required : 'display', eventname : currentEvent, datefrom: fromm, dateto: too}
+            postdata = {required : 'display', eventname : currentEvent, datefrom: fromm, dateto: too};
+            historical = true;
         }
 		$.ajax({
 			type       : "POST",
@@ -578,7 +580,11 @@ var app = {
 			data       : postdata,
 			dataType   : 'json',
 			success    : function(response) {
-				html = '<ul class="twitter-content-listview" data-role="listview" data-split-icon="search" >';
+                html = '';
+                if(historical) {
+                    html += '<p class="notice">Showing Youtube Videos from '+new XDate(fromm*1000).toString("dddd MMM d, yyyy HH:mm:ss")+' to '+new XDate(too*1000).toString("dddd MMM d, yyyy HH:mm:ss")+'</p>';
+                }
+				html += '<ul class="twitter-content-listview" data-role="listview" data-split-icon="search" >';
 				var jsonyoutubedata = response; //JSON.parse(response);
                 if(response != null) {
                     var resultcount = jsonyoutubedata.results.length;
@@ -634,6 +640,7 @@ var app = {
 		var PreCogURL = localStorage.getItem("PreCogURL");
 		var currentEvent = localStorage.getItem("currentEvent");
         var postdata = {};
+        historical = false;
         var notcomplete = false;
         $("#google-content").html('');
         if (fromm === undefined && too === undefined) {
@@ -646,7 +653,8 @@ var app = {
                 postdata       =  {required : 'uadisplay', eventname : useridorname, more: 0};
             }
         } else {
-            postdata       = {required : 'display', eventname : currentEvent, from: fromm, to: too}
+            postdata       = {required : 'display', eventname : currentEvent, from: fromm, to: too};
+            historical = true;
         }
 		$.ajax({
 			type       : "POST",
@@ -657,8 +665,11 @@ var app = {
 			data       : postdata,
 			dataType   : 'json',
 			success    : function(response) {	
-                
-				html = '<ul class="twitter-content-listview" data-role="listview" data-split-icon="search" >';
+                html = '';
+                if(historical) {
+                        html += '<p class="notice">Showing G+ posts from '+new XDate(fromm*1000).toString("dddd MMM d, yyyy HH:mm:ss")+' to '+new XDate(too*1000).toString("dddd MMM d, yyyy HH:mm:ss")+'</p>';
+                }
+				html += '<ul class="twitter-content-listview" data-role="listview" data-split-icon="search" >';
 				var jsongpdata = response; //JSON.parse(response);
                 if(jsongpdata && jsongpdata.results != null) {
                     var resultcount = jsongpdata.results.length;
@@ -699,11 +710,13 @@ var app = {
 		var PreCogURL = localStorage.getItem("PreCogURL");
 		var currentEvent = localStorage.getItem("currentEvent");
         $("#flickr-content").html('');
+        historical = false;
         postdata = {required : 'display', eventname : currentEvent};
         if(fromm === undefined && too === undefined) {
             postdata = {required : 'display', eventname : currentEvent};
         } else {
-            postdata = {required : 'display', eventname : currentEvent, datefrom: fromm, dateto: too}
+            postdata = {required : 'display', eventname : currentEvent, datefrom: fromm, dateto: too};
+            historical = true;
         }
 		$.ajax({
 			type       : "POST",
@@ -715,6 +728,9 @@ var app = {
 			dataType   : 'json',
 			success    : function(response) {
 				html  = '';
+                if(historical) {
+                    html += '<p class="notice">Showing flickr photos from '+new XDate(fromm*1000).toString("dddd MMM d, yyyy HH:mm:ss")+' to '+new XDate(too*1000).toString("dddd MMM d, yyyy HH:mm:ss")+'</p>';
+                }
 				var jsonflickrdata = response;
                 if(jsonflickrdata != null) {
                     var resultcount = jsonflickrdata.results.length;
@@ -763,6 +779,7 @@ var app = {
 		var PreCogURL = localStorage.getItem("PreCogURL");
 		var currentEvent = localStorage.getItem("currentEvent");
         $("#facebook-content").html('');
+        historical = false;
         postdata = {};
         if (fromm === undefined && too === undefined) {
 			if (useridorname === undefined) {
@@ -825,7 +842,8 @@ var app = {
         }   
         else {
             // Historical Facebook posts
-            postdata       = {required : 'display', eventname : currentEvent, datefrom: fromm, dateto: too}
+            postdata       = {required : 'display', eventname : currentEvent, datefrom: fromm, dateto: too};
+            historical = true;
         }
 		$.ajax({
 			type       : "POST",
@@ -836,7 +854,11 @@ var app = {
 			data       : postdata,
 			dataType   : 'json',
 			success    : function(response) {
-				html = '<ul class="twitter-content-listview" data-role="listview" data-split-icon="search" >';
+                html = '';
+                if(historical) {
+                        html += '<p class="notice">Showing facebook posts from '+new XDate(fromm*1000).toString("dddd MMM d, yyyy HH:mm:ss")+' to '+new XDate(too*1000).toString("dddd MMM d, yyyy HH:mm:ss")+'</p>';
+                }
+				html += '<ul class="twitter-content-listview" data-role="listview" data-split-icon="search" >';
 				var jsonfbdata = response;
 				var resultcount = jsonfbdata.results.length;
 				for (var i = 0; i < resultcount; i++) {
@@ -1015,7 +1037,7 @@ var app = {
                     }
 					html += '<ul class="twitter-content-listview" data-role="listview" data-split-icon="search">';
                     if(more <= 0) {
-                        html = '<ul class="twitter-content-listview" data-role="listview"  data-split-icon="search">';
+                        html += '<ul class="twitter-content-listview" data-role="listview"  data-split-icon="search">';
                     } else {
                         html = $(".twitter-content-listview").html();
                     }
